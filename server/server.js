@@ -199,6 +199,37 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
+// API: Xóa tài khoản (Cho Admin)
+app.delete('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Ngăn admin tự xóa chính mình nếu cần, nhưng tạm thời cứ cho phép xóa theo id
+    await pool.query('DELETE FROM users WHERE id = $1', [id]);
+    res.json({ message: 'Đã xóa tài khoản' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Reset mật khẩu (Cho Admin)
+app.put('/api/users/:id/reset-password', async (req, res) => {
+  const { id } = req.params;
+  const { newPassword } = req.body;
+  
+  if (!newPassword) {
+    return res.status(400).json({ error: 'Vui lòng cung cấp mật khẩu mới' });
+  }
+
+  try {
+    const salt = bcrypt.genSaltSync(10);
+    const hashPassword = bcrypt.hashSync(newPassword, salt);
+    await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashPassword, id]);
+    res.json({ message: 'Đã đặt lại mật khẩu thành công' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // API 3.2: Quản lý văn bản (Lấy danh sách inbox hoặc sent)
 app.get('/api/documents', async (req, res) => {
   const { userId, type } = req.query; // type: 'inbox' | 'sent'

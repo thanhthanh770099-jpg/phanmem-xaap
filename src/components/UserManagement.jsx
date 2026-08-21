@@ -37,6 +37,36 @@ const UserManagement = ({ user }) => {
     }
   };
 
+  const handleDeleteUser = async (id, username) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa tài khoản "${username}" không?`)) return;
+    
+    try {
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/users/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Xóa thất bại');
+      setUsers(users.filter(u => u.id !== id));
+      alert('Đã xóa tài khoản thành công!');
+    } catch (error) {
+      alert('Lỗi: ' + error.message);
+    }
+  };
+
+  const handleResetPassword = async (id, username) => {
+    const newPassword = window.prompt(`Nhập mật khẩu mới cho tài khoản "${username}":`);
+    if (!newPassword) return;
+
+    try {
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/users/${id}/reset-password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword })
+      });
+      if (!res.ok) throw new Error('Đặt lại mật khẩu thất bại');
+      alert('Đã đặt lại mật khẩu thành công!');
+    } catch (error) {
+      alert('Lỗi: ' + error.message);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -95,10 +125,11 @@ const UserManagement = ({ user }) => {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th width="15%">ID</th>
-              <th width="35%">Tên đăng nhập</th>
-              <th width="35%">Tên hiển thị / Ấp</th>
+              <th width="10%">ID</th>
+              <th width="25%">Tên đăng nhập</th>
+              <th width="30%">Tên hiển thị / Ấp</th>
               <th width="15%">Quyền</th>
+              <th width="20%">Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -124,6 +155,20 @@ const UserManagement = ({ user }) => {
                     ) : (
                       <span style={{ color: '#004085', backgroundColor: '#cce5ff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>Người dùng (Ấp)</span>
                     )}
+                  </td>
+                  <td>
+                    <button 
+                      onClick={() => handleResetPassword(u.id, u.username)}
+                      style={{ padding: '4px 8px', marginRight: '8px', backgroundColor: '#ffc107', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                    >
+                      Đổi mật khẩu
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteUser(u.id, u.username)}
+                      style={{ padding: '4px 8px', backgroundColor: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                    >
+                      Xóa
+                    </button>
                   </td>
                 </tr>
               ))
