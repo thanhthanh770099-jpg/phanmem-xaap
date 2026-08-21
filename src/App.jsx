@@ -8,6 +8,7 @@ import Profile from './components/Profile';
 import DocumentManager from './components/DocumentManager';
 import Feedback from './components/Feedback';
 import PublicFeedback from './components/PublicFeedback';
+import PublicDanhSachLanhDao from './components/PublicDanhSachLanhDao';
 import UserManagement from './components/UserManagement';
 
 function App() {
@@ -53,6 +54,10 @@ function App() {
 
   if (window.location.pathname === '/phan-anh') {
     return <PublicFeedback />;
+  }
+  
+  if (window.location.pathname === '/danh-sach-lanh-dao') {
+    return <PublicDanhSachLanhDao />;
   }
 
   if (!user) {

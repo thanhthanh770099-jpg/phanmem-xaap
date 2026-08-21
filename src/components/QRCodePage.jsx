@@ -51,6 +51,7 @@ const QRCodePage = () => {
           description="Xem thông tin liên hệ, số điện thoại của trưởng ấp, phó ấp và ban điều hành 20 ấp."
           icon={User}
           color="#10b981"
+          qrValue={`${window.location.origin}/danh-sach-lanh-dao`}
         />
         <QRCodeCard 
           title="Công An - An Ninh Trật Tự" 

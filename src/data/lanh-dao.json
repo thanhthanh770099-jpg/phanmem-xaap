@@ -1,0 +1,162 @@
+[
+  {
+    "id": 1,
+    "ap": "Ấp Ba Tiêu",
+    "truongBan": "Huỳnh Văn Sây La",
+    "sdtTruongBan": "0364.512.546",
+    "biThu": "Trần Phương Vũ",
+    "sdtBiThu": "0939.210.682"
+  },
+  {
+    "id": 2,
+    "ap": "Ấp Đa Lộc",
+    "truongBan": "Kiên Thanh Tuấn",
+    "sdtTruongBan": "0972.734.607",
+    "biThu": "Trần Hồng Thắng",
+    "sdtBiThu": "0978.133.777"
+  },
+  {
+    "id": 3,
+    "ap": "Ấp Tầm Phương",
+    "truongBan": "Nguyễn Duy Thanh",
+    "sdtTruongBan": "0353.719.828",
+    "biThu": "Thạch Xuân Hải",
+    "sdtBiThu": "0354.766.257"
+  },
+  {
+    "id": 4,
+    "ap": "Đầu Giồng",
+    "truongBan": "Hồ Phú Quí",
+    "sdtTruongBan": "0939.083.583",
+    "biThu": "Huỳnh Sơn",
+    "sdtBiThu": "0969.272.820"
+  },
+  {
+    "id": 5,
+    "ap": "Ấp Phú Mỹ",
+    "truongBan": "Trần Trung Nghĩa",
+    "sdtTruongBan": "0866.407.525",
+    "biThu": "Trần Văn Từ",
+    "sdtBiThu": "0917.317.417"
+  },
+  {
+    "id": 6,
+    "ap": "Ấp Nhà Dựa",
+    "truongBan": "Tiền Ngọc Thơ",
+    "sdtTruongBan": "0987.085.348",
+    "biThu": "Trương Minh Hiếu",
+    "sdtBiThu": "0907.939.067"
+  },
+  {
+    "id": 7,
+    "ap": "Ấp Ô Tre ",
+    "truongBan": "Võ Minh Liệt",
+    "sdtTruongBan": "0363.526.274",
+    "biThu": "Lê Tuấn Anh",
+    "sdtBiThu": "0839.234.113"
+  },
+  {
+    "id": 8,
+    "ap": "Ấp Thanh Mỹ",
+    "truongBan": "Đặng Thị Ngọc Hân",
+    "sdtTruongBan": "0346.259.752",
+    "biThu": "Trang Văn Thi",
+    "sdtBiThu": "0343.520.848"
+  },
+  {
+    "id": 9,
+    "ap": "Ấp Thanh Trì A",
+    "truongBan": "Trần Thanh Tâm",
+    "sdtTruongBan": "0939.180.732",
+    "biThu": "Thạch Thành",
+    "sdtBiThu": "0964.060.575"
+  },
+  {
+    "id": 10,
+    "ap": "Ấp Thanh Trì B",
+    "truongBan": "Thạch Văn Thuận",
+    "sdtTruongBan": "0979.340.230",
+    "biThu": "Nguyễn Chí Tưng",
+    "sdtBiThu": "0974.464.923"
+  },
+  {
+    "id": 11,
+    "ap": "Ấp Bàu Sơn",
+    "truongBan": "Sơn Ngọc Thươne",
+    "sdtTruongBan": "0366.528.204",
+    "biThu": "Kim  Sam Nang",
+    "sdtBiThu": "0589.141.599"
+  },
+  {
+    "id": 12,
+    "ap": "Ấp Hương Phụ A",
+    "truongBan": "Thạch Thanh Vũ",
+    "sdtTruongBan": "0964.655.510",
+    "biThu": "Thạch Thị Nga",
+    "sdtBiThu": "0386.900.426"
+  },
+  {
+    "id": 13,
+    "ap": "Ấp Hương Phụ B",
+    "truongBan": "Thạch Sây Ha La",
+    "sdtTruongBan": "0939.208.078",
+    "biThu": "Trần Thanh Hoàng",
+    "sdtBiThu": "0395.903.274"
+  },
+  {
+    "id": 14,
+    "ap": "Ấp Hương Phụ C",
+    "truongBan": "Sơn Ngọc Phước",
+    "sdtTruongBan": "0389.769.671",
+    "biThu": "Phan Thị Cẩm Giang",
+    "sdtBiThu": "0767.930.915"
+  },
+  {
+    "id": 15,
+    "ap": "Ấp Giồng Lức",
+    "truongBan": "Trần Văn Thanh",
+    "sdtTruongBan": "0969.674.499",
+    "biThu": "Thạch Hiển",
+    "sdtBiThu": "0376.447.154"
+  },
+  {
+    "id": 16,
+    "ap": "Ấp Thanh Nguyên A",
+    "truongBan": "Lê Quan Minh",
+    "sdtTruongBan": "0988.852.159",
+    "biThu": "Kim Thanh",
+    "sdtBiThu": "0987.508.342"
+  },
+  {
+    "id": 17,
+    "ap": "Ấp Thanh Nguyên B",
+    "truongBan": "Lưu Hữu Vinh",
+    "sdtTruongBan": "0964.101.526",
+    "biThu": "Kim Ngọt",
+    "sdtBiThu": "0397.797.828"
+  },
+  {
+    "id": 18,
+    "ap": "Ấp Phú Nhiêu",
+    "truongBan": "Võ Thanh Hải",
+    "sdtTruongBan": "0369.430.239",
+    "biThu": "Nguyễn Văn Tới",
+    "sdtBiThu": "0918.839.150"
+  },
+  {
+    "id": 19,
+    "ap": "Ấp Phú Thọ",
+    "truongBan": "Võ Văn Trò",
+    "sdtTruongBan": "0918.847.558",
+    "biThu": "Nguyễn Văn Quít",
+    "sdtBiThu": "0944.991.017"
+  },
+  {
+    "id": 20,
+    "ap": "Ấp Cây Dương",
+    "truongBan": "Trần Văn Tư",
+    "sdtTruongBan": "0917.917.400",
+    "biThu": "Nguyễn Thiện Linh",
+    "sdtBiThu": "0888.800.529"
+  }
+]
