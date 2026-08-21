@@ -67,7 +67,7 @@ const PublicFeedback = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#f4f7f6', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
+    <div style={{ backgroundColor: '#f4f7f6', minHeight: '100vh', overflowY: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}>
       <div className={styles.container} style={{ margin: 0, width: '100%', maxWidth: '600px' }}>
         <h2 className={styles.title} style={{ textAlign: 'center', marginBottom: '24px' }}>Cổng Phản Ánh Kiến Nghị</h2>
         <p style={{ textAlign: 'center', color: '#666', marginBottom: '24px' }}>
