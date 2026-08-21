@@ -8,6 +8,7 @@ import Profile from './components/Profile';
 import DocumentManager from './components/DocumentManager';
 import Feedback from './components/Feedback';
 import PublicFeedback from './components/PublicFeedback';
+import UserManagement from './components/UserManagement';
 
 function App() {
   const [activeTab, setActiveTab] = useState(0); // 0 = Dashboard
@@ -62,13 +63,14 @@ function App() {
     <>
       <Header user={user} onLogout={handleLogout} setActiveTab={setActiveTab} />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', height: 'calc(100vh - 70px)' }}>
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} unreadDocCount={unreadDocCount} unreadFeedbackCount={unreadFeedbackCount} />
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} unreadDocCount={unreadDocCount} unreadFeedbackCount={unreadFeedbackCount} user={user} />
         <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#f4f7f6' }}>
           {activeTab === 1 ? <DocumentManager user={user} unreadDocCount={unreadDocCount} refreshUnreadCount={fetchUnreadCount} />
             : activeTab === 2 ? <Feedback user={user} refreshUnreadFeedbackCount={fetchUnreadFeedbackCount} />
               : activeTab === 3 ? <QRCodePage />
                 : activeTab === 4 ? <Profile user={user} onUserUpdate={handleUserUpdate} />
-                  : <Dashboard />}
+                  : activeTab === 6 ? <UserManagement user={user} />
+                    : <Dashboard />}
         </div>
       </div>
     </>

@@ -39,7 +39,7 @@ const Header = ({ user, onLogout, setActiveTab }) => {
             <div className={styles.dropdownMenu}>
               <div 
                 className={styles.dropdownItem} 
-                onClick={() => { setActiveTab(5); setShowDropdown(false); }}
+                onClick={() => { setActiveTab(4); setShowDropdown(false); }}
               >
                 Tài khoản của tôi
               </div>

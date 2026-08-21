@@ -162,6 +162,43 @@ app.get('/api/users/hamlets', async (req, res) => {
   }
 });
 
+// API: Lấy danh sách tất cả người dùng (Cho Admin)
+app.get('/api/users', async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT id, username, name, role, created_at FROM users ORDER BY created_at DESC");
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Tạo tài khoản mới (Cho Admin)
+app.post('/api/users', async (req, res) => {
+  const { username, password, name, role } = req.body;
+  if (!username || !password || !name || !role) {
+    return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+  }
+
+  try {
+    // Kiểm tra xem username đã tồn tại chưa
+    const checkUser = await pool.query('SELECT id FROM users WHERE username = $1', [username]);
+    if (checkUser.rows.length > 0) {
+      return res.status(400).json({ error: 'Tên đăng nhập đã tồn tại' });
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hashPassword = bcrypt.hashSync(password, salt);
+
+    await pool.query(
+      'INSERT INTO users (username, password, name, role) VALUES ($1, $2, $3, $4)',
+      [username, hashPassword, name, role]
+    );
+    res.json({ message: 'Tạo tài khoản thành công' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // API 3.2: Quản lý văn bản (Lấy danh sách inbox hoặc sent)
 app.get('/api/documents', async (req, res) => {
   const { userId, type } = req.query; // type: 'inbox' | 'sent'

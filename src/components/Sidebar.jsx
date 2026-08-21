@@ -2,13 +2,17 @@ import React from 'react';
 import styles from './Sidebar.module.css';
 import { ChevronRight } from 'lucide-react';
 
-const menuItems = [
-  { id: 1, title: 'Quản lý văn bản', isNew: false },
-  { id: 2, title: 'Tiếp nhận và xử lý ý kiến của người dân', isNew: false },
-  { id: 3, title: 'Mã QR code', isNew: true },
-];
+const Sidebar = ({ activeTab, setActiveTab, unreadDocCount, unreadFeedbackCount, user }) => {
+  const menuItems = [
+    { id: 1, title: 'Quản lý văn bản', isNew: false },
+    { id: 2, title: 'Tiếp nhận và xử lý ý kiến của người dân', isNew: false },
+    { id: 3, title: 'Mã QR code', isNew: true },
+  ];
 
-const Sidebar = ({ activeTab, setActiveTab, unreadDocCount, unreadFeedbackCount }) => {
+  if (user?.role === 'admin') {
+    menuItems.push({ id: 6, title: 'Quản lý tài khoản', isNew: false });
+  }
+
   return (
     <aside className={styles.sidebar}>
       <ul className={styles.menuList}>
