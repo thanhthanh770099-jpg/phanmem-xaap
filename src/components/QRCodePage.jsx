@@ -44,7 +44,7 @@ const QRCodePage = () => {
           description="Gửi phản ánh, kiến nghị về các vấn đề dân sinh, môi trường, hạ tầng trên địa bàn xã."
           icon={MessageSquare}
           color="#f59e0b"
-          // qrValue={`${window.location.origin}/phan-anh`}
+          qrValue={`${window.location.origin}/phan-anh`}
         />
         <QRCodeCard 
           title="Thông Tin Lãnh Đạo Các Ấp" 
