@@ -1,0 +1,98 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 70px;
+  background: var(--header-bg-gradient);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.logoContainer {
+  width: 250px; /* Bằng với độ rộng sidebar */
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  background-color: var(--primary-blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+  background-color: #1557b0;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  color: var(--header-text);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userName {
+  font-weight: 500;
+  color: var(--primary-blue);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--primary-blue);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.avatarImg {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--primary-blue);
+}
+.dropdownMenu {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dropdownItem:hover {
+  background: #f4f7f6;
+}
