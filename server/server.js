@@ -165,7 +165,7 @@ app.get('/api/users/hamlets', async (req, res) => {
 // API: Lấy danh sách tất cả người dùng (Cho Admin)
 app.get('/api/users', async (req, res) => {
   try {
-    const { rows } = await pool.query("SELECT id, username, name, role, created_at FROM users ORDER BY created_at DESC");
+    const { rows } = await pool.query("SELECT id, username, name, role FROM users ORDER BY id DESC");
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: error.message });

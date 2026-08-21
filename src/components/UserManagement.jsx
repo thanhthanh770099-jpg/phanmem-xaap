@@ -96,10 +96,9 @@ const UserManagement = ({ user }) => {
           <thead>
             <tr>
               <th width="15%">ID</th>
-              <th width="25%">Tên đăng nhập</th>
-              <th width="30%">Tên hiển thị / Ấp</th>
+              <th width="35%">Tên đăng nhập</th>
+              <th width="35%">Tên hiển thị / Ấp</th>
               <th width="15%">Quyền</th>
-              <th width="15%">Ngày tạo</th>
             </tr>
           </thead>
           <tbody>
@@ -126,7 +125,6 @@ const UserManagement = ({ user }) => {
                       <span style={{ color: '#004085', backgroundColor: '#cce5ff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>Người dùng (Ấp)</span>
                     )}
                   </td>
-                  <td>{new Date(u.created_at).toLocaleDateString('vi-VN')}</td>
                 </tr>
               ))
             )}
