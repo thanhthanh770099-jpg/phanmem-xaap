@@ -101,7 +101,7 @@ const Profile = ({ user, onUserUpdate }) => {
         </div>
         <div className={styles.formGroup}>
           <label className={styles.label}>Quyền hạn</label>
-          <input className={styles.input} value={user.role === 'admin' ? 'Quản trị viên (Admin)' : 'Người dùng (Ấp)'} disabled />
+          <input className={styles.input} value={user.role === 'admin' ? 'Quản trị viên (Admin)' : user.role === 'ubnd' ? 'Cán bộ UBND Xã' : 'Người dùng (Ấp)'} disabled />
         </div>
       </div>
 

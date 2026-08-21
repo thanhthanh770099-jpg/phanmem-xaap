@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './DocumentManager.module.css';
 
 const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
-  const isAdmin = user.role === 'admin';
+  const [isSending, setIsSending] = useState(false);
+  const isAdmin = user.role === 'admin' || user.role === 'ubnd';
   const [currentTab, setCurrentTab] = useState('inbox'); // 'inbox' hoặc 'sent'
   const [documents, setDocuments] = useState([]);
   const [hamlets, setHamlets] = useState([]);

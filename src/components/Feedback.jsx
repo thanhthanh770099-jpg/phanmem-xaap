@@ -177,7 +177,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
             <tr>
               <th width="12%">Thời gian</th>
               <th width="15%">Họ và tên</th>
-              {user.role === 'admin' && <th width="15%">Gửi đến</th>}
+              {user.role !== 'user' && <th width="15%">Gửi đến</th>}
               <th width="25%">Nội dung</th>
               <th width="15%">Trạng thái</th>
               <th width="15%">Thao tác</th>
@@ -186,11 +186,11 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           <tbody>
             {isLoadingFeedbacks ? (
               <tr>
-                <td colSpan={user.role === 'admin' ? 6 : 5} style={{ textAlign: 'center' }}>Đang tải dữ liệu...</td>
+                <td colSpan={user.role !== 'user' ? 6 : 5} style={{ textAlign: 'center' }}>Đang tải dữ liệu...</td>
               </tr>
             ) : !Array.isArray(feedbacks) || feedbacks.length === 0 ? (
               <tr>
-                <td colSpan={user.role === 'admin' ? 6 : 5}>
+                <td colSpan={user.role !== 'user' ? 6 : 5}>
                   <div className={styles.emptyState}>Chưa có ý kiến nào được ghi nhận.</div>
                 </td>
               </tr>
@@ -202,7 +202,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                     <strong>{fb.name}</strong><br/>
                     <small>{fb.phone}</small>
                   </td>
-                  {user.role === 'admin' && <td>{fb.hamlet_name}</td>}
+                  {user.role !== 'user' && <td>{fb.hamlet_name}</td>}
                   <td style={{ whiteSpace: 'pre-wrap' }}>{fb.content}</td>
                   <td>
                     {fb.status === 'handled' ? (

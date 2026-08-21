@@ -152,6 +152,8 @@ const UserManagement = ({ user }) => {
                   <td>
                     {u.role === 'admin' ? (
                       <span style={{ color: '#155724', backgroundColor: '#d4edda', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>Quản trị viên</span>
+                    ) : u.role === 'ubnd' ? (
+                      <span style={{ color: '#856404', backgroundColor: '#fff3cd', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>Cán bộ UBND Xã</span>
                     ) : (
                       <span style={{ color: '#004085', backgroundColor: '#cce5ff', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>Người dùng (Ấp)</span>
                     )}
@@ -210,6 +212,7 @@ const UserManagement = ({ user }) => {
           <label className={styles.label}>Quyền hạn <span style={{color: 'red'}}>*</span></label>
           <select name="role" value={formData.role} onChange={handleChange} className={styles.select} required>
             <option value="user">Người dùng (Ấp)</option>
+            <option value="ubnd">Cán bộ UBND Xã</option>
             <option value="admin">Quản trị viên (Admin)</option>
           </select>
         </div>

@@ -300,16 +300,16 @@ app.post('/api/documents', async (req, res) => {
     const docId = insertDoc.rows[0].id;
 
     let targets = [];
-    if (senderRole === 'admin') {
+    if (senderRole === 'admin' || senderRole === 'ubnd') {
       targets = recipientIds;
       if (!targets || targets.length === 0) {
         const users = await pool.query("SELECT id FROM users WHERE role = 'user'");
         targets = users.rows.map(u => u.id);
       }
     } else {
-      // Ấp gửi thì người nhận luôn là admin
-      const admins = await pool.query("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
-      targets = [admins.rows[0].id];
+      // Ấp gửi thì người nhận là admin và cán bộ xã (ubnd)
+      const admins = await pool.query("SELECT id FROM users WHERE role IN ('admin', 'ubnd')");
+      targets = admins.rows.map(a => a.id);
     }
 
     for (const rid of targets) {
