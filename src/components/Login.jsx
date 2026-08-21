@@ -51,7 +51,7 @@ const Login = ({ onLoginSuccess }) => {
               className={styles.input} 
               value={username}
               onChange={e => setUsername(e.target.value)}
-              placeholder="Nhập tên đăng nhập (vd: admin, ap1)"
+              placeholder="Nhập tên đăng nhập"
               required
             />
           </div>
