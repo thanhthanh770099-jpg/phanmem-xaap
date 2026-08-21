@@ -18,7 +18,7 @@ function App() {
   const fetchUnreadCount = async () => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/documents/unread-count?userId=${user.id}`);
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/documents/unread-count?userId=${user.id}`)
       const data = await res.json();
       setUnreadDocCount(data.unreadCount || 0);
     } catch (e) {
@@ -29,7 +29,7 @@ function App() {
   const fetchUnreadFeedbackCount = async () => {
     if (!user) return;
     try {
-      const res = await fetch(`/api/feedbacks/unread-count?userId=${user.id}&role=${user.role}`);
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/unread-count?userId=${user.id}`)
       const data = await res.json();
       setUnreadFeedbackCount(data.unreadCount || 0);
     } catch (e) {
@@ -64,11 +64,11 @@ function App() {
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', height: 'calc(100vh - 70px)' }}>
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} unreadDocCount={unreadDocCount} unreadFeedbackCount={unreadFeedbackCount} />
         <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#f4f7f6' }}>
-          {activeTab === 1 ? <DocumentManager user={user} unreadDocCount={unreadDocCount} refreshUnreadCount={fetchUnreadCount} /> 
-          : activeTab === 2 ? <Feedback user={user} refreshUnreadFeedbackCount={fetchUnreadFeedbackCount} />
-          : activeTab === 3 ? <QRCodePage /> 
-          : activeTab === 4 ? <Profile user={user} onUserUpdate={handleUserUpdate} /> 
-          : <Dashboard />}
+          {activeTab === 1 ? <DocumentManager user={user} unreadDocCount={unreadDocCount} refreshUnreadCount={fetchUnreadCount} />
+            : activeTab === 2 ? <Feedback user={user} refreshUnreadFeedbackCount={fetchUnreadFeedbackCount} />
+              : activeTab === 3 ? <QRCodePage />
+                : activeTab === 4 ? <Profile user={user} onUserUpdate={handleUserUpdate} />
+                  : <Dashboard />}
         </div>
       </div>
     </>

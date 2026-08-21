@@ -40,7 +40,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const fetchFeedbacks = async () => {
     setIsLoadingFeedbacks(true);
     try {
-      const res = await fetch(`/api/feedbacks?userId=${user.id}&role=${user.role}`);
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks?userId=${user.id}&role=${user.role}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setFeedbacks(data);
@@ -58,7 +58,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
 
   const fetchHamlets = async () => {
     try {
-      const res = await fetch('/api/users/hamlets');
+      const res = await fetch('https://phanmem-xaap.onrender.com/api/users/hamlets');
       const data = await res.json();
       setHamlets(data);
       if (data.length > 0 && !formData.hamletId && user.role !== 'user') {
@@ -96,7 +96,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('/api/feedbacks', {
+      const response = await fetch('https://phanmem-xaap.onrender.com/api/feedbacks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -129,7 +129,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch(`/api/feedbacks/${selectedFeedback.id}/handle`, {
+      const response = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${selectedFeedback.id}/handle`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(handleData)

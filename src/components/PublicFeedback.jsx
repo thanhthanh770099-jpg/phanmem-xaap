@@ -18,7 +18,7 @@ const PublicFeedback = () => {
 
   const fetchHamlets = async () => {
     try {
-      const res = await fetch('/api/users/hamlets');
+      const res = await fetch('https://phanmem-xaap.onrender.com/api/users/hamlets');
       const data = await res.json();
       setHamlets(data);
       if (data.length > 0) {
@@ -40,7 +40,7 @@ const PublicFeedback = () => {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('/api/feedbacks', {
+      const response = await fetch('https://phanmem-xaap.onrender.com/api/feedbacks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

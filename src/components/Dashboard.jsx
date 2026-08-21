@@ -18,7 +18,7 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    fetch('/api/dashboard/stats')
+    fetch('https://phanmem-xaap.onrender.com/api/dashboard/stats')
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error('Lỗi khi tải dữ liệu thống kê:', err));

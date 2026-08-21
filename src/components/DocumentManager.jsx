@@ -22,7 +22,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
 
   const fetchDocuments = async () => {
     try {
-      const res = await fetch(`/api/documents?userId=${user.id}&type=${currentTab}`);
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/documents?userId=${user.id}&type=${currentTab}`);
       const data = await res.json();
       setDocuments(data);
     } catch (e) {
@@ -32,7 +32,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
 
   const fetchHamlets = async () => {
     try {
-      const res = await fetch(`/api/users/hamlets`);
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/users/hamlets`);
       const data = await res.json();
       setHamlets(data);
     } catch (e) {
@@ -54,7 +54,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
   const handleSendDocument = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/documents', {
+      const res = await fetch('https://phanmem-xaap.onrender.com/api/documents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -85,7 +85,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
     setShowDetail(doc);
     if (currentTab === 'inbox' && doc.status === 'unread') {
       try {
-        await fetch(`/api/documents/${doc.id}/read`, {
+        await fetch(`https://phanmem-xaap.onrender.com/api/documents/${doc.id}/read`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.id })

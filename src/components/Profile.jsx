@@ -28,7 +28,7 @@ const Profile = ({ user, onUserUpdate }) => {
 
     setIsPwdLoading(true);
     try {
-      const response = await fetch(`/api/users/${user.id}/password`, {
+      const response = await fetch(`https://phanmem-xaap.onrender.com/api/users/${user.id}/password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ oldPassword, newPassword })
@@ -68,7 +68,7 @@ const Profile = ({ user, onUserUpdate }) => {
 
     setIsAvatarLoading(true);
     try {
-      const response = await fetch(`/api/users/${user.id}/avatar`, {
+      const response = await fetch(`https://phanmem-xaap.onrender.com/api/users/${user.id}/avatar`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ avatar: avatarBase64 })
