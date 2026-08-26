@@ -134,7 +134,8 @@ app.get('/api/dashboard/stats', async (req, res) => {
     }
 
     const completedTaskPercent = totalRecipientsCount === 0 ? 0 : Math.round((totalRead / totalRecipientsCount) * 100);
-    const pendingDocuments = totalRecipientsCount - totalRead;
+    const pendingDocsResult = await pool.query("SELECT COUNT(DISTINCT document_id) FROM document_recipients WHERE status != 'completed'");
+    const pendingDocuments = parseInt(pendingDocsResult.rows[0].count) || 0;
 
     const recentDocsResult = await pool.query('SELECT id, number, summary, created_at FROM documents ORDER BY created_at DESC LIMIT 5');
 
