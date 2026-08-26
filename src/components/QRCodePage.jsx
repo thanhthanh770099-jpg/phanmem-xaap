@@ -27,16 +27,51 @@ const QRCodePage = () => {
   return (
     <div className={styles.pageContainer}>
       <div className={styles.headerArea}>
-        <h2>Mã QR Cổng Thông Tin Công Dân</h2>
-        <p className={styles.subtitle}>Quét mã QR bằng ứng dụng Zalo hoặc Camera điện thoại để truy cập nhanh các dịch vụ (Dịch vụ công, Phản ánh, Thông tin lãnh đạo, An ninh trật tự).</p>
+        <h2>Mã QR các phần mềm và Thông tin liên hệ</h2>
+        <p className={styles.subtitle}>Quét mã QR bằng ứng dụng Zalo hoặc Camera điện thoại để truy cập nhanh các dịch vụ.</p>
+      </div>
+
+      <div className={styles.qrGrid}>
+        <QRCodeCard 
+          title="Cổng Dịch Vụ Công" 
+          description="Truy cập nhanh cổng dịch vụ công trực tuyến để nộp hồ sơ, tra cứu thủ tục hành chính."
+          icon={Globe}
+          color="#3b82f6"
+          qrValue="https://dichvucong.gov.vn/"
+        />
+        <QRCodeCard 
+          title="Phản Ánh, Kiến Nghị" 
+          description="Gửi phản ánh, kiến nghị về các vấn đề dân sinh, môi trường, hạ tầng trên địa bàn xã."
+          icon={MessageSquare}
+          color="#f59e0b"
+          qrValue={`${window.location.origin}/phan-anh`}
+        />
+        <QRCodeCard 
+          title="Thông Tin Lãnh Đạo Các Ấp" 
+          description="Xem thông tin liên hệ, số điện thoại của trưởng ấp, phó ấp và ban điều hành 20 ấp."
+          icon={User}
+          color="#10b981"
+          qrValue={`${window.location.origin}/danh-sach-lanh-dao`}
+        />
+        <QRCodeCard 
+          title="Công An - An Ninh Trật Tự" 
+          description="Số điện thoại trực ban Công an xã và thông tin liên hệ đảm bảo an ninh trật tự các ấp."
+          icon={Shield}
+          color="#ef4444"
+        />
+      </div>
+
+      <div className={styles.headerArea} style={{ marginTop: '40px' }}>
+        <h2>Mã QR Cổng Thông Tin Công Dân (Gộp chung)</h2>
+        <p className={styles.subtitle}>Sử dụng mã QR này để chia sẻ cho người dân. Người dân có thể truy cập 1 lúc 4 tiện ích bên trên mà không cần đăng nhập.</p>
       </div>
 
       <div className={styles.qrGrid} style={{ display: 'flex', justifyContent: 'center' }}>
         <QRCodeCard 
           title="Cổng Thông Tin Công Dân" 
-          description="Quét mã này để truy cập tất cả 4 tiện ích: Dịch vụ công, Phản ánh kiến nghị, Thông tin lãnh đạo các ấp, và An ninh trật tự (không cần đăng nhập)."
+          description="Quét mã này để truy cập tất cả 4 tiện ích: Dịch vụ công, Phản ánh kiến nghị, Thông tin lãnh đạo các ấp, và An ninh trật tự."
           icon={Globe}
-          color="#3b82f6"
+          color="#8b5cf6"
           qrValue={`${window.location.origin}/cong-dan`}
         />
       </div>
