@@ -113,18 +113,18 @@ app.get('/api/dashboard/stats', async (req, res) => {
       const stats = await pool.query(`
         SELECT 
           COUNT(*) as total_received,
-          SUM(CASE WHEN status = 'read' THEN 1 ELSE 0 END) as total_read
+          SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as total_completed
         FROM document_recipients 
         WHERE recipient_id = $1
       `, [hamlet.id]);
 
       const total = parseInt(stats.rows[0].total_received) || 0;
-      const read = parseInt(stats.rows[0].total_read) || 0;
+      const completed = parseInt(stats.rows[0].total_completed) || 0;
 
       totalRecipientsCount += total;
-      totalRead += read;
+      totalRead += completed; // We reuse totalRead variable for completed to avoid changing everything
 
-      const progress = total === 0 ? 0 : Math.round((read / total) * 100);
+      const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
 
       hamletsProgress.push({
         id: hamlet.id,
@@ -338,6 +338,22 @@ app.put('/api/documents/:id/read', async (req, res) => {
       [id, userId]
     );
     res.json({ message: 'Đã đánh dấu đọc' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API 3.5: Đánh dấu hoàn thành
+app.put('/api/documents/:id/complete', async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+
+  try {
+    await pool.query(
+      "UPDATE document_recipients SET status = 'completed', read_at = CURRENT_TIMESTAMP WHERE document_id = $1 AND recipient_id = $2",
+      [id, userId]
+    );
+    res.json({ message: 'Đã xác nhận hoàn thành' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

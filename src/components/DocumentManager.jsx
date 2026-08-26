@@ -99,6 +99,26 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
     }
   };
 
+  const handleCompleteDocument = async () => {
+    try {
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/documents/${showDetail.id}/complete`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      });
+      if (res.ok) {
+        setDocuments(docs => docs.map(d => d.id === showDetail.id ? { ...d, status: 'completed' } : d));
+        setShowDetail({ ...showDetail, status: 'completed' });
+        alert('Đã xác nhận hoàn thành!');
+      } else {
+        alert('Có lỗi xảy ra');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Lỗi: ' + e.message);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -147,10 +167,10 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
                   <td>{new Date(doc.created_at).toLocaleString('vi-VN')}</td>
                   <td>
                     {currentTab === 'sent' ? (
-                      <span className={styles.badgeRead}>{doc.read_count} / {doc.total_recipients} đã đọc</span>
+                      <span className={styles.badgeRead}>{doc.read_count} / {doc.total_recipients} đã đọc/hoàn thành</span>
                     ) : (
-                      <span className={isUnread ? `${styles.badge} ${styles.badgeNew}` : `${styles.badge} ${styles.badgeRead}`}>
-                        {isUnread ? 'Mới' : 'Đã đọc'}
+                      <span className={isUnread ? `${styles.badge} ${styles.badgeNew}` : doc.status === 'completed' ? `${styles.badge} ${styles.badgeCompleted}` : `${styles.badge} ${styles.badgeRead}`}>
+                        {isUnread ? 'Mới' : doc.status === 'completed' ? 'Hoàn thành' : 'Đã đọc'}
                       </span>
                     )}
                   </td>
@@ -244,8 +264,8 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
                         <tr key={i}>
                           <td>{r.name}</td>
                           <td>
-                            <span className={r.status === 'read' ? styles.badgeRead : styles.badgeNew} style={{ padding: '2px 6px', borderRadius: '4px', fontSize: '11px' }}>
-                              {r.status === 'read' ? 'Đã đọc' : 'Chưa đọc'}
+                            <span className={r.status === 'completed' ? styles.badgeCompleted : r.status === 'read' ? styles.badgeRead : styles.badgeNew} style={{ padding: '2px 6px', borderRadius: '4px', fontSize: '11px' }}>
+                              {r.status === 'completed' ? 'Hoàn thành' : r.status === 'read' ? 'Đã đọc' : 'Chưa đọc'}
                             </span>
                           </td>
                           <td>{r.read_at ? new Date(r.read_at).toLocaleString('vi-VN') : '-'}</td>
@@ -258,7 +278,12 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
             )}
             
             <div className={styles.modalActions}>
-              <button className={styles.btn} onClick={() => setShowDetail(null)}>Đóng</button>
+              {!isAdmin && currentTab === 'inbox' && showDetail.status !== 'completed' && (
+                <button className={`${styles.btn}`} style={{ backgroundColor: '#10b981' }} onClick={handleCompleteDocument}>
+                  Xác nhận Hoàn thành
+                </button>
+              )}
+              <button className={`${styles.btn} ${styles.btnCancel}`} onClick={() => setShowDetail(null)}>Đóng</button>
             </div>
           </div>
         </div>

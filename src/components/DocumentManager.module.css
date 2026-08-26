@@ -120,6 +120,11 @@
   color: #4caf50;
 }
 
+.badgeCompleted {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
 /* Modal */
 .modalOverlay {
   position: fixed;
