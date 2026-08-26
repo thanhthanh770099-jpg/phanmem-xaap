@@ -9,6 +9,8 @@ import DocumentManager from './components/DocumentManager';
 import Feedback from './components/Feedback';
 import PublicFeedback from './components/PublicFeedback';
 import PublicDanhSachLanhDao from './components/PublicDanhSachLanhDao';
+import PublicPortal from './components/PublicPortal';
+import PublicAnNinh from './components/PublicAnNinh';
 import UserManagement from './components/UserManagement';
 
 function App() {
@@ -58,6 +60,14 @@ function App() {
   
   if (window.location.pathname === '/danh-sach-lanh-dao') {
     return <PublicDanhSachLanhDao />;
+  }
+
+  if (window.location.pathname === '/cong-dan') {
+    return <PublicPortal />;
+  }
+
+  if (window.location.pathname === '/an-ninh') {
+    return <PublicAnNinh />;
   }
 
   if (!user) {
