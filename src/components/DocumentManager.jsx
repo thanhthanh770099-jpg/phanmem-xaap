@@ -16,6 +16,11 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
   const [fileBase64, setFileBase64] = useState('');
   const [selectedHamlets, setSelectedHamlets] = useState([]);
 
+  // For Reply Feature
+  const [replySummary, setReplySummary] = useState('');
+  const [replyFileBase64, setReplyFileBase64] = useState('');
+  const [isReplying, setIsReplying] = useState(false);
+
   useEffect(() => {
     fetchDocuments();
     if (isAdmin) fetchHamlets();
@@ -47,6 +52,17 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setFileBase64(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleReplyFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReplyFileBase64(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -116,6 +132,54 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
     } catch (e) {
       console.error(e);
       alert('Lỗi: ' + e.message);
+    }
+  };
+
+  const handleSubmitReply = async (e) => {
+    e.preventDefault();
+    if (!replySummary) return alert('Vui lòng nhập nội dung phản hồi');
+    setIsReplying(true);
+    
+    try {
+      // 1. Send the reply document
+      const postRes = await fetch('https://phanmem-xaap.onrender.com/api/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          number: 'PH-' + showDetail.number, 
+          summary: replySummary, 
+          fileUrl: replyFileBase64, 
+          senderId: user.id, 
+          senderRole: user.role,
+        })
+      });
+
+      if (!postRes.ok) {
+        throw new Error('Lỗi khi gửi phản hồi');
+      }
+
+      // 2. Mark the original document as completed
+      const putRes = await fetch(`https://phanmem-xaap.onrender.com/api/documents/${showDetail.id}/complete`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      });
+
+      if (!putRes.ok) {
+        throw new Error('Lỗi khi xác nhận hoàn thành');
+      }
+
+      setDocuments(docs => docs.map(d => d.id === showDetail.id ? { ...d, status: 'completed' } : d));
+      setShowDetail({ ...showDetail, status: 'completed' });
+      setReplySummary('');
+      setReplyFileBase64('');
+      alert('Đã gửi phản hồi và hoàn thành công văn!');
+      fetchDocuments(); // Refresh to see it in outbox
+    } catch (e) {
+      console.error(e);
+      alert(e.message);
+    } finally {
+      setIsReplying(false);
     }
   };
 
@@ -276,14 +340,40 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
                 </div>
               </div>
             )}
+
+            {!isAdmin && currentTab === 'inbox' && showDetail.status !== 'completed' && (
+              <div style={{ marginTop: '24px', padding: '16px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                <h4 style={{ margin: '0 0 12px 0', color: '#1e293b' }}>Phản hồi công văn</h4>
+                <form onSubmit={handleSubmitReply}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>Nội dung phản hồi báo cáo</label>
+                    <textarea 
+                      required 
+                      className={styles.textarea} 
+                      value={replySummary} 
+                      onChange={e => setReplySummary(e.target.value)}
+                      placeholder="Nhập nội dung báo cáo tiến độ..."
+                    ></textarea>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>File đính kèm báo cáo (tùy chọn)</label>
+                    <input type="file" onChange={handleReplyFileChange} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+                    <button type="submit" className={styles.btn} style={{ backgroundColor: '#10b981' }} disabled={isReplying}>
+                      {isReplying ? 'Đang gửi...' : 'Gửi phản hồi & Hoàn thành'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
             
             <div className={styles.modalActions}>
-              {!isAdmin && currentTab === 'inbox' && showDetail.status !== 'completed' && (
-                <button className={`${styles.btn}`} style={{ backgroundColor: '#10b981' }} onClick={handleCompleteDocument}>
-                  Xác nhận Hoàn thành
-                </button>
-              )}
-              <button className={`${styles.btn} ${styles.btnCancel}`} onClick={() => setShowDetail(null)}>Đóng</button>
+              <button className={`${styles.btn} ${styles.btnCancel}`} onClick={() => {
+                setShowDetail(null);
+                setReplySummary('');
+                setReplyFileBase64('');
+              }}>Đóng</button>
             </div>
           </div>
         </div>
