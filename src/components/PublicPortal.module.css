@@ -15,6 +15,7 @@
 }
 
 .logo {
+  display: none; /* Hide on mobile by default */
   width: 64px;
   height: 64px;
   margin-bottom: 16px;
@@ -83,6 +84,10 @@
 }
 
 @media (min-width: 768px) {
+  .logo {
+    display: block;
+  }
+  
   .menuGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
