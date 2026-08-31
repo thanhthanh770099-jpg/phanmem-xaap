@@ -2,7 +2,7 @@ import React from 'react';
 
 const PublicAnNinh = () => {
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif', height: '100vh', overflowY: 'auto', boxSizing: 'border-box' }}>
       <h1 style={{ color: '#ef4444', textAlign: 'center', marginBottom: '30px' }}>Công An - An Ninh Trật Tự</h1>
       
       <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fca5a5', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
