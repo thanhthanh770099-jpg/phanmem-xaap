@@ -23,7 +23,7 @@ const PublicAnNinh = () => {
       </div>
       
       <div style={{ textAlign: 'center', marginTop: '30px' }}>
-        <a href="/cong-dan" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 'bold' }}>&larr; Quay lại Cổng Thông Tin</a>
+        <a href="/cong-dan" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 'bold' }}>&larr; Quay lại Mô hình Ấp Số</a>
       </div>
     </div>
   );

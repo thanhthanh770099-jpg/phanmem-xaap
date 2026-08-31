@@ -7,7 +7,7 @@ const PublicPortal = () => {
     <div className={styles.portalContainer}>
       <div className={styles.header}>
         <img src="/vite.svg" alt="Logo" className={styles.logo} />
-        <h1>Cổng Thông Tin Công Dân</h1>
+        <h1>Mô hình Ấp Số</h1>
         <p>Chọn một trong các mục dưới đây để tiếp tục</p>
       </div>
 

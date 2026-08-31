@@ -6,7 +6,7 @@ const Sidebar = ({ activeTab, setActiveTab, unreadDocCount, unreadFeedbackCount,
   const menuItems = [
     { id: 1, title: 'Quản lý văn bản', isNew: false },
     { id: 2, title: 'Tiếp nhận và xử lý ý kiến của người dân', isNew: false },
-    { id: 3, title: 'Mã QR code', isNew: true },
+    { id: 3, title: 'Mô hình Ấp Số', isNew: true },
   ];
 
   if (user?.role === 'admin') {

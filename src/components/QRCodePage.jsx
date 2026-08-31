@@ -62,13 +62,13 @@ const QRCodePage = () => {
       </div>
 
       <div className={styles.headerArea} style={{ marginTop: '40px' }}>
-        <h2>Mã QR Cổng Thông Tin Công Dân (Gộp chung)</h2>
+        <h2>Mã QR Mô hình Ấp Số (Gộp chung)</h2>
         <p className={styles.subtitle}>Sử dụng mã QR này để chia sẻ cho người dân. Người dân có thể truy cập 1 lúc 4 tiện ích bên trên mà không cần đăng nhập.</p>
       </div>
 
       <div className={styles.qrGrid} style={{ display: 'flex', justifyContent: 'center' }}>
         <QRCodeCard 
-          title="Cổng Thông Tin Công Dân" 
+          title="Mô hình Ấp Số" 
           description="Quét mã này để truy cập tất cả 4 tiện ích: Dịch vụ công, Phản ánh kiến nghị, Thông tin lãnh đạo các ấp, và An ninh trật tự."
           icon={Globe}
           color="#8b5cf6"
