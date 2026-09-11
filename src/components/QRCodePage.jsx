@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './QRCodePage.module.css';
-import { Globe, MessageSquare, User, Shield } from 'lucide-react';
+import { Globe, MessageSquare, User, Shield, CreditCard } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const QRCodeCard = ({ title, description, icon: Icon, color, qrValue }) => (
@@ -32,6 +32,13 @@ const QRCodePage = () => {
       </div>
 
       <div className={styles.qrGrid}>
+        <QRCodeCard 
+          title="Hướng dẫn Thanh toán không dùng tiền mặt" 
+          description="Quét mã để xem hướng dẫn chi tiết các hình thức thanh toán trực tuyến, chuyển khoản, quét mã QR."
+          icon={CreditCard}
+          color="#06b6d4"
+          qrValue="https://vnpay.vn/"
+        />
         <QRCodeCard 
           title="Cổng Dịch Vụ Công" 
           description="Truy cập nhanh cổng dịch vụ công trực tuyến để nộp hồ sơ, tra cứu thủ tục hành chính."
