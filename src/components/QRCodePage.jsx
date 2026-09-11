@@ -37,7 +37,7 @@ const QRCodePage = () => {
           description="Quét mã để xem hướng dẫn chi tiết các hình thức thanh toán trực tuyến, chuyển khoản, quét mã QR."
           icon={CreditCard}
           color="#06b6d4"
-          qrValue="https://vnpay.vn/"
+          qrValue={`${window.location.origin}/huong-dan-thanh-toan`}
         />
         <QRCodeCard 
           title="Cổng Dịch Vụ Công" 

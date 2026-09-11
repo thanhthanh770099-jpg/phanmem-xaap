@@ -12,6 +12,7 @@ import PublicDanhSachLanhDao from './components/PublicDanhSachLanhDao';
 import PublicPortal from './components/PublicPortal';
 import PublicAnNinh from './components/PublicAnNinh';
 import UserManagement from './components/UserManagement';
+import PaymentGuide from './components/PaymentGuide';
 
 function App() {
   const [activeTab, setActiveTab] = useState(0); // 0 = Dashboard
@@ -68,6 +69,10 @@ function App() {
 
   if (window.location.pathname === '/an-ninh') {
     return <PublicAnNinh />;
+  }
+
+  if (window.location.pathname === '/huong-dan-thanh-toan') {
+    return <PaymentGuide />;
   }
 
   if (!user) {
