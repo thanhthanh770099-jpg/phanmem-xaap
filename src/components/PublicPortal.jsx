@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, MessageSquare, User, Shield } from 'lucide-react';
+import { Globe, MessageSquare, User, Shield, CreditCard } from 'lucide-react';
 import styles from './PublicPortal.module.css';
 
 const PublicPortal = () => {
@@ -12,6 +12,14 @@ const PublicPortal = () => {
       </div>
 
       <div className={styles.menuGrid}>
+        <a href="/huong-dan-thanh-toan" className={styles.menuCard}>
+          <div className={styles.iconWrapper} style={{ backgroundColor: '#06b6d4' }}>
+            <CreditCard size={32} color="white" />
+          </div>
+          <h3>Thanh Toán KDTM</h3>
+          <p>Hướng dẫn thanh toán không dùng tiền mặt</p>
+        </a>
+
         <a href="https://dichvucong.gov.vn/" target="_blank" rel="noopener noreferrer" className={styles.menuCard}>
           <div className={styles.iconWrapper} style={{ backgroundColor: '#3b82f6' }}>
             <Globe size={32} color="white" />
