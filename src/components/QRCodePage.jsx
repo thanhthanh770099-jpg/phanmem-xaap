@@ -102,13 +102,23 @@ const QRCodePage = () => {
             color="#dc2626"
             qrValue={`${window.location.origin}/`}
           />
-          <QRCodeCard 
-            title="MÔ HÌNH ẤP SỐ (GỘP CHUNG)" 
-            description="Quét mã này để truy cập tất cả tiện ích của Ấp Số"
-            icon={QrCode}
-            color="#4f46e5"
-            qrValue={`${window.location.origin}/cong-dan`}
-          />
+        </div>
+
+        {/* Master QR Code */}
+        <div className={styles.masterQrSection}>
+          <h3>Mã QR Tổng Hợp (Mô Hình Ấp Số)</h3>
+          <p>
+            Sử dụng mã QR này để chia sẻ chung cho người dân. Khi quét mã, người dân sẽ được truy cập vào giao diện tổng hợp bao gồm tất cả các tiện ích bên trên mà không cần cài đặt nhiều ứng dụng.
+          </p>
+          <div style={{ maxWidth: '280px', width: '100%' }}>
+            <QRCodeCard 
+              title="MÔ HÌNH ẤP SỐ (GỘP CHUNG)" 
+              description="Quét mã này để truy cập tất cả tiện ích của Ấp Số"
+              icon={QrCode}
+              color="#4f46e5"
+              qrValue={`${window.location.origin}/cong-dan`}
+            />
+          </div>
         </div>
 
         {/* Footer Section */}
