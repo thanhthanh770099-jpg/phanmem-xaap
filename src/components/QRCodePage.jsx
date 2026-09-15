@@ -1,100 +1,129 @@
 import React from 'react';
 import styles from './QRCodePage.module.css';
-import { Globe, MessageSquare, User, Shield, CreditCard, Smartphone, PlayCircle } from 'lucide-react';
+import { 
+  Landmark, ShieldCheck, MessageSquare, 
+  CreditCard, Smartphone, Users, 
+  Shield, QrCode, Star, Heart, Users as UsersIcon, Shield as ShieldIcon
+} from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const QRCodeCard = ({ title, description, icon: Icon, color, qrValue }) => (
-  <div className={styles.qrCard}>
-    <div className={styles.cardHeader}>
-      <div className={styles.iconWrapper} style={{ backgroundColor: color }}>
-        <Icon size={24} color="white" />
-      </div>
-      <h3 className={styles.cardTitle}>{title}</h3>
+  <div className={styles.qrCard} style={{ borderColor: color }}>
+    <div className={styles.iconCircle} style={{ backgroundColor: color }}>
+      <Icon size={28} color="white" />
+    </div>
+    <h3 className={styles.cardTitle} style={{ color: color }}>{title}</h3>
+    <div className={styles.qrWrapper}>
+      {qrValue ? (
+        <QRCodeSVG value={qrValue} size={130} level="M" />
+      ) : (
+        <div className={styles.qrPlaceholder}>N/A</div>
+      )}
     </div>
     <p className={styles.cardDesc}>{description}</p>
-    <div className={styles.qrPlaceholder}>
-      {qrValue ? (
-        <QRCodeSVG value={qrValue} size={120} level="M" />
-      ) : (
-        <div style={{width: 120, height: 120, backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>N/A</div>
-      )}
-      <span className={styles.scanText}>Quét để truy cập</span>
-    </div>
   </div>
 );
 
 const QRCodePage = () => {
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.headerArea}>
-        <h2>Mã QR các phần mềm và Thông tin liên hệ</h2>
-        <p className={styles.subtitle}>Quét mã QR bằng ứng dụng Zalo hoặc Camera điện thoại để truy cập nhanh các dịch vụ.</p>
-      </div>
+    <div className={styles.pageWrapper}>
+      <div className={styles.posterContainer}>
+        
+        {/* Header Section */}
+        <div className={styles.posterHeader}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
+            <Star size={40} color="#dc2626" fill="#dc2626" />
+            <h2 className={styles.orgTitle}>ỦY BAN NHÂN DÂN XÃ CHÂU THÀNH</h2>
+            <Star size={40} color="#dc2626" fill="#dc2626" />
+          </div>
+          <h1 className={styles.mainTitle}>ẤP THÔNG MINH</h1>
+          <div className={styles.pillBanner}>
+            QUÉT QR ĐỂ KẾT NỐI - TIỆN ÍCH TRONG TẦM TAY
+          </div>
+          <p className={styles.slogan}>
+            🌿 CÔNG NGHỆ SỐ - KẾT NỐI NGƯỜI DÂN - XÂY DỰNG ẤP VĂN MINH, HIỆN ĐẠI 🌿
+          </p>
+        </div>
 
-      <div className={styles.qrGrid}>
-        <QRCodeCard 
-          title="Hướng dẫn Thanh toán không dùng tiền mặt" 
-          description="Quét mã để xem hướng dẫn chi tiết các hình thức thanh toán trực tuyến, chuyển khoản, quét mã QR."
-          icon={CreditCard}
-          color="#06b6d4"
-          qrValue={`${window.location.origin}/huong-dan-thanh-toan`}
-        />
-        <QRCodeCard 
-          title="Hướng dẫn kích hoạt VNEID" 
-          description="Quét mã để xem video hướng dẫn kích hoạt tài khoản định danh điện tử VNEID mức độ 2."
-          icon={PlayCircle}
-          color="#db2777"
-          qrValue={`${window.location.origin}/huong-dan-vneid`}
-        />
-        <QRCodeCard 
-          title="Hướng dẫn cài đặt SMART Vĩnh Long" 
-          description="Quét mã để xem hướng dẫn cài đặt và sử dụng ứng dụng SMART Vĩnh Long."
-          icon={Smartphone}
-          color="#8b5cf6"
-          qrValue={`${window.location.origin}/huong-dan-smart-vinh-long`}
-        />
-        <QRCodeCard 
-          title="Cổng Dịch Vụ Công" 
-          description="Truy cập nhanh cổng dịch vụ công trực tuyến để nộp hồ sơ, tra cứu thủ tục hành chính."
-          icon={Globe}
-          color="#3b82f6"
-          qrValue="https://dichvucong.gov.vn/"
-        />
-        <QRCodeCard 
-          title="Phản Ánh, Kiến Nghị" 
-          description="Gửi phản ánh, kiến nghị về các vấn đề dân sinh, môi trường, hạ tầng trên địa bàn xã."
-          icon={MessageSquare}
-          color="#f59e0b"
-          qrValue={`${window.location.origin}/phan-anh`}
-        />
-        <QRCodeCard 
-          title="Thông tin Bí thư, Trưởng ban nhân dân các ấp" 
-          description="Xem thông tin liên hệ, số điện thoại của Bí thư, Trưởng ban nhân dân 20 ấp."
-          icon={User}
-          color="#10b981"
-          qrValue={`${window.location.origin}/danh-sach-lanh-dao`}
-        />
-        <QRCodeCard 
-          title="Công An - An Ninh Trật Tự" 
-          description="Số điện thoại trực ban Công an xã và thông tin liên hệ đảm bảo an ninh trật tự các ấp."
-          icon={Shield}
-          color="#ef4444"
-        />
-      </div>
+        {/* QR Code Grid */}
+        <div className={styles.qrGrid}>
+          <QRCodeCard 
+            title="CỔNG DỊCH VỤ CÔNG QUỐC GIA" 
+            description="Thực hiện thủ tục hành chính mọi lúc, mọi nơi"
+            icon={Landmark}
+            color="#2563eb"
+            qrValue="https://dichvucong.gov.vn/"
+          />
+          <QRCodeCard 
+            title="ỨNG DỤNG ĐỊNH DANH ĐIỆN TỬ (VNeID)" 
+            description="Đăng ký, đăng nhập, sử dụng các tiện ích trên VNeID"
+            icon={ShieldCheck}
+            color="#16a34a"
+            qrValue={`${window.location.origin}/huong-dan-vneid`}
+          />
+          <QRCodeCard 
+            title="PHẢN ÁNH HIỆN TRƯỜNG KIẾN NGHỊ - GÓP Ý" 
+            description="Phản ánh kịp thời các vấn đề để chính quyền xử lý"
+            icon={MessageSquare}
+            color="#ea580c"
+            qrValue={`${window.location.origin}/phan-anh`}
+          />
+          <QRCodeCard 
+            title="THANH TOÁN KHÔNG DÙNG TIỀN MẶT" 
+            description="Thanh toán hóa đơn, học phí, viện phí, phí dịch vụ công..."
+            icon={CreditCard}
+            color="#9333ea"
+            qrValue={`${window.location.origin}/huong-dan-thanh-toan`}
+          />
+          <QRCodeCard 
+            title="ỨNG DỤNG SMART VĨNH LONG" 
+            description="Cài đặt và sử dụng các tiện ích đô thị thông minh"
+            icon={Smartphone}
+            color="#0284c7"
+            qrValue={`${window.location.origin}/huong-dan-smart-vinh-long`}
+          />
+          <QRCodeCard 
+            title="THÔNG TIN CỦA ẤP" 
+            description="Cập nhật thông tin lãnh đạo, thông báo mới nhất của ấp"
+            icon={Users}
+            color="#059669"
+            qrValue={`${window.location.origin}/danh-sach-lanh-dao`}
+          />
+          <QRCodeCard 
+            title="AN NINH TRẬT TỰ" 
+            description="Số điện thoại trực ban Công an xã và liên hệ bảo đảm ANTT"
+            icon={Shield}
+            color="#dc2626"
+            qrValue={`${window.location.origin}/`}
+          />
+          <QRCodeCard 
+            title="MÔ HÌNH ẤP SỐ (GỘP CHUNG)" 
+            description="Quét mã này để truy cập tất cả tiện ích của Ấp Số"
+            icon={QrCode}
+            color="#4f46e5"
+            qrValue={`${window.location.origin}/cong-dan`}
+          />
+        </div>
 
-      <div className={styles.headerArea} style={{ marginTop: '40px' }}>
-        <h2>Mã QR Mô hình Ấp Số (Gộp chung)</h2>
-        <p className={styles.subtitle}>Sử dụng mã QR này để chia sẻ cho người dân. Người dân có thể truy cập tất cả các tiện ích bên trên mà không cần đăng nhập.</p>
-      </div>
+        {/* Footer Section */}
+        <div className={styles.posterFooter}>
+          <div className={styles.footerInfo}>
+            <div className={styles.footerItem}>
+              <UsersIcon size={24} />
+              <span>CHUNG TAY CHUYỂN ĐỔI SỐ<br/>VÌ CUỘC SỐNG TỐT ĐẸP HƠN</span>
+            </div>
+            <div className={styles.footerItem}>
+              <ShieldIcon size={24} />
+              <span>AN TOÀN - BẢO MẬT<br/>HIỆU QUẢ - TIẾT KIỆM</span>
+            </div>
+          </div>
+          <div className={styles.footerBanner}>
+            <Heart size={18} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '10px' }} />
+            MỖI NGƯỜI DÂN LÀ MỘT CÔNG DÂN SỐ - MỖI GIA ĐÌNH LÀ MỘT GIA ĐÌNH SỐ
+            <Heart size={18} style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: '10px' }} />
+          </div>
+        </div>
 
-      <div className={styles.qrGrid} style={{ display: 'flex', justifyContent: 'center' }}>
-        <QRCodeCard 
-          title="Mô hình Ấp Số" 
-          description="Quét mã này để truy cập tất cả tiện ích sau: Thanh toán KDTM, Hướng dẫn kích hoạt VNEID, Hướng dẫn cài đặt SMART Vĩnh Long, Dịch vụ công, Phản ánh kiến nghị, Thông tin Bí thư và Trưởng ban nhân dân các ấp, và An ninh trật tự."
-          icon={Globe}
-          color="#8b5cf6"
-          qrValue={`${window.location.origin}/cong-dan`}
-        />
       </div>
     </div>
   );
