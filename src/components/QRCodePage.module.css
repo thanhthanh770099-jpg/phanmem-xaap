@@ -100,19 +100,24 @@
 }
 
 .iconImageWrapper {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 12px;
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  overflow: hidden;
+  background-color: white;
+  border: 1px solid #e2e8f0;
 }
 
 .iconImage {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 8px; /* Optional, makes images look a bit smoother */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(1.08) contrast(1.12);
 }
 
 .cardTitle {
