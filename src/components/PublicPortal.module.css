@@ -1,9 +1,13 @@
 .pageWrapper {
   padding: 20px;
   background-color: #f0f4f8;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
 }
 
 .posterContainer {
