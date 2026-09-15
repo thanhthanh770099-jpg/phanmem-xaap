@@ -362,15 +362,15 @@ app.put('/api/documents/:id/complete', async (req, res) => {
 
 // API 4: Lưu ý kiến người dân
 app.post('/api/feedbacks', async (req, res) => {
-  const { name, phone, hamletId, content } = req.body;
+  const { name, phone, hamletId, content, imageUrl } = req.body;
   if (!name || !hamletId || !content) {
     return res.status(400).json({ error: 'Vui lòng điền đầy đủ các thông tin bắt buộc' });
   }
 
   try {
     await pool.query(
-      'INSERT INTO citizen_feedbacks (name, phone, hamlet_id, content) VALUES ($1, $2, $3, $4)',
-      [name, phone, hamletId, content]
+      'INSERT INTO citizen_feedbacks (name, phone, hamlet_id, content, image_url) VALUES ($1, $2, $3, $4, $5)',
+      [name, phone, hamletId, content, imageUrl || null]
     );
     res.json({ message: 'Gửi ý kiến thành công' });
   } catch (error) {

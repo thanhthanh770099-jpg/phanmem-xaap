@@ -13,7 +13,8 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     name: '',
     phone: '',
     hamletId: user?.role === 'user' ? user.id : '',
-    content: ''
+    content: '',
+    imageUrl: ''
   });
   
   // Handle Form State
@@ -74,6 +75,23 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Vui lòng chọn ảnh có dung lượng nhẹ (dưới 2MB) để tránh quá tải máy chủ.');
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData(prev => ({ ...prev, imageUrl: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleHandleChange = (e) => {
     const { name, value } = e.target;
     setHandleData(prev => ({ ...prev, [name]: value }));
@@ -112,7 +130,8 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
         ...prev,
         name: '',
         phone: '',
-        content: ''
+        content: '',
+        imageUrl: ''
       }));
       
       setTimeout(() => setViewMode('list'), 2000);
@@ -265,6 +284,18 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           </select>
         </div>
         <div className={styles.formGroup}>
+          <label className={styles.label}>Hình ảnh đính kèm (nếu có, tối đa 2MB)</label>
+          <input type="file" accept="image/*" onChange={handleImageChange} className={styles.input} style={{ padding: '8px' }} key={status.message} />
+          {formData.imageUrl && (
+            <div style={{ marginTop: '10px' }}>
+              <img src={formData.imageUrl} alt="Đính kèm" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid #ddd' }} />
+              <button type="button" onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))} style={{ display: 'block', marginTop: '8px', padding: '6px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}>
+                Xóa ảnh
+              </button>
+            </div>
+          )}
+        </div>
+        <div className={styles.formGroup}>
           <label className={styles.label}>Nội dung ý kiến, kiến nghị</label>
           <textarea name="content" value={formData.content} onChange={handleCreateChange} className={styles.textarea} required />
         </div>
@@ -294,6 +325,12 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           <div className={styles.infoRow}><span className={styles.infoLabel}>Người gửi:</span> {selectedFeedback.name} ({selectedFeedback.phone})</div>
           <div className={styles.infoRow}><span className={styles.infoLabel}>Thời gian gửi:</span> {new Date(selectedFeedback.created_at).toLocaleString('vi-VN')}</div>
           <div className={styles.infoRow}><span className={styles.infoLabel}>Nội dung:</span> <br/><span style={{whiteSpace:'pre-wrap'}}>{selectedFeedback.content}</span></div>
+          {selectedFeedback.image_url && (
+            <div className={styles.infoRow} style={{ marginTop: 16 }}>
+              <span className={styles.infoLabel}>Hình ảnh đính kèm:</span> <br/>
+              <img src={selectedFeedback.image_url} alt="Đính kèm" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px', border: '1px solid #ddd', marginTop: '10px' }} />
+            </div>
+          )}
           {selectedFeedback.status === 'handled' && selectedFeedback.handled_at && (
              <div className={styles.infoRow} style={{marginTop: 16, color: '#155724'}}><span className={styles.infoLabel}>Đã xử lý lúc:</span> {new Date(selectedFeedback.handled_at).toLocaleString('vi-VN')}</div>
           )}

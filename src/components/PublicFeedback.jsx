@@ -7,7 +7,8 @@ const PublicFeedback = () => {
     name: '',
     phone: '',
     hamletId: '',
-    content: ''
+    content: '',
+    imageUrl: ''
   });
   const [status, setStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,6 +35,24 @@ const PublicFeedback = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Giới hạn 2MB = 2 * 1024 * 1024 bytes
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Vui lòng chọn ảnh có dung lượng nhẹ (dưới 2MB) để tránh quá tải máy chủ.');
+      e.target.value = ''; // Reset
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData(prev => ({ ...prev, imageUrl: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -56,7 +75,8 @@ const PublicFeedback = () => {
         ...prev,
         name: '',
         phone: '',
-        content: ''
+        content: '',
+        imageUrl: ''
       }));
       
     } catch (error) {
@@ -96,6 +116,18 @@ const PublicFeedback = () => {
                 <option key={hamlet.id} value={hamlet.id}>{hamlet.name}</option>
               ))}
             </select>
+          </div>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Hình ảnh đính kèm (nếu có, tối đa 2MB)</label>
+            <input type="file" accept="image/*" onChange={handleImageChange} className={styles.input} style={{ padding: '8px' }} key={status.message} />
+            {formData.imageUrl && (
+              <div style={{ marginTop: '10px' }}>
+                <img src={formData.imageUrl} alt="Đính kèm" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid #ddd' }} />
+                <button type="button" onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))} style={{ display: 'block', marginTop: '8px', padding: '6px 12px', background: '#dc2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}>
+                  Xóa ảnh
+                </button>
+              </div>
+            )}
           </div>
           <div className={styles.formGroup}>
             <label className={styles.label}>Nội dung ý kiến, kiến nghị <span style={{color: 'red'}}>*</span></label>
