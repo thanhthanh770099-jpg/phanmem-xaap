@@ -1,72 +1,112 @@
 import React from 'react';
-import { Globe, MessageSquare, User, Shield, CreditCard, Smartphone, PlayCircle } from 'lucide-react';
+import { Landmark, MessageSquare, Shield, Users } from 'lucide-react';
 import styles from './PublicPortal.module.css';
+
+const MenuCard = ({ href, title, description, icon: Icon, imageSrc, color, isExternal }) => {
+  const content = (
+    <>
+      {imageSrc ? (
+        <div className={styles.iconImageWrapper} style={{ borderColor: color }}>
+          <img src={imageSrc} alt={title} className={styles.iconImage} />
+        </div>
+      ) : (
+        <div className={styles.iconWrapper} style={{ backgroundColor: color }}>
+          <Icon size={32} color="white" />
+        </div>
+      )}
+      <div className={styles.cardContent}>
+        <h3 style={{ color: color }}>{title}</h3>
+        <p>{description}</p>
+      </div>
+    </>
+  );
+
+  if (isExternal) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={styles.menuCard} style={{ borderLeftColor: color }}>
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <a href={href} className={styles.menuCard} style={{ borderLeftColor: color }}>
+      {content}
+    </a>
+  );
+};
 
 const PublicPortal = () => {
   return (
     <div className={styles.portalContainer}>
       <div className={styles.header}>
-        <img src="/vite.svg" alt="Logo" className={styles.logo} />
-        <h1>Mô hình Ấp Số</h1>
-        <p>Chọn một trong các mục dưới đây để tiếp tục</p>
+        <h2>ỦY BAN NHÂN DÂN XÃ CHÂU THÀNH</h2>
+        <h1>ẤP THÔNG MINH</h1>
+        <p className={styles.subtitle}>CÔNG NGHỆ SỐ - KẾT NỐI NGƯỜI DÂN</p>
       </div>
 
       <div className={styles.menuGrid}>
-        <a href="/huong-dan-thanh-toan" className={styles.menuCard}>
-          <div className={styles.iconWrapper} style={{ backgroundColor: '#06b6d4' }}>
-            <CreditCard size={32} color="white" />
-          </div>
-          <h3>Thanh Toán KDTM</h3>
-          <p>Hướng dẫn thanh toán không dùng tiền mặt</p>
-        </a>
+        <MenuCard 
+          href="https://dichvucong.gov.vn/"
+          title="CỔNG DỊCH VỤ CÔNG QUỐC GIA"
+          description="Thực hiện thủ tục hành chính mọi lúc, mọi nơi"
+          icon={Landmark}
+          color="#c2410c"
+          isExternal={true}
+        />
 
-        <a href="/huong-dan-vneid" className={styles.menuCard}>
-          <div className={styles.iconWrapper} style={{ backgroundColor: '#db2777' }}>
-            <PlayCircle size={32} color="white" />
-          </div>
-          <h3>Kích hoạt VNEID</h3>
-          <p>Hướng dẫn kích hoạt tài khoản định danh VNEID mức 2</p>
-        </a>
+        <MenuCard 
+          href="/huong-dan-vneid"
+          title="ỨNG DỤNG ĐỊNH DANH ĐIỆN TỬ (VNeID)"
+          description="Đăng ký, đăng nhập, sử dụng các tiện ích trên VNeID"
+          imageSrc="/images/vneid.png"
+          color="#16a34a"
+        />
 
-        <a href="/huong-dan-smart-vinh-long" className={styles.menuCard}>
-          <div className={styles.iconWrapper} style={{ backgroundColor: '#8b5cf6' }}>
-            <Smartphone size={32} color="white" />
-          </div>
-          <h3>SMART Vĩnh Long</h3>
-          <p>Hướng dẫn cài đặt ứng dụng SMART Vĩnh Long</p>
-        </a>
+        <MenuCard 
+          href="/phan-anh"
+          title="PHẢN ÁNH - KIẾN NGHỊ CỦA NGƯỜI DÂN"
+          description="Phản ánh kịp thời các vấn đề để chính quyền xử lý"
+          icon={MessageSquare}
+          color="#ea580c"
+        />
 
-        <a href="https://dichvucong.gov.vn/" target="_blank" rel="noopener noreferrer" className={styles.menuCard}>
-          <div className={styles.iconWrapper} style={{ backgroundColor: '#3b82f6' }}>
-            <Globe size={32} color="white" />
-          </div>
-          <h3>Cổng Dịch Vụ Công</h3>
-          <p>Nộp hồ sơ, tra cứu thủ tục hành chính trực tuyến</p>
-        </a>
+        <MenuCard 
+          href="/huong-dan-thanh-toan"
+          title="THANH TOÁN KHÔNG DÙNG TIỀN MẶT"
+          description="Thanh toán hóa đơn, học phí, viện phí, phí dịch vụ công..."
+          imageSrc="/images/thanh-toan.png"
+          color="#9333ea"
+        />
 
-        <a href="/phan-anh" className={styles.menuCard}>
-          <div className={styles.iconWrapper} style={{ backgroundColor: '#f59e0b' }}>
-            <MessageSquare size={32} color="white" />
-          </div>
-          <h3>Phản Ánh, Kiến Nghị</h3>
-          <p>Gửi phản ánh về các vấn đề dân sinh, môi trường</p>
-        </a>
+        <MenuCard 
+          href="/huong-dan-smart-vinh-long"
+          title="ỨNG DỤNG SMART VĨNH LONG"
+          description="Cài đặt và sử dụng các tiện ích đô thị thông minh"
+          imageSrc="/images/smart.png"
+          color="#0284c7"
+        />
 
-        <a href="/danh-sach-lanh-dao" className={styles.menuCard}>
-          <div className={styles.iconWrapper} style={{ backgroundColor: '#10b981' }}>
-            <User size={32} color="white" />
-          </div>
-          <h3>Thông tin Bí thư, Trưởng ban nhân dân các ấp</h3>
-          <p>Xem thông tin liên hệ của Bí thư, Trưởng ban nhân dân 20 ấp</p>
-        </a>
+        <MenuCard 
+          href="/danh-sach-lanh-dao"
+          title="THÔNG TIN BÍ THƯ VÀ TRƯỞNG BAN NHÂN DÂN CÁC ẤP"
+          description="Cập nhật thông tin lãnh đạo, thông báo mới nhất của ấp"
+          icon={Users}
+          color="#059669"
+        />
 
-        <a href="/an-ninh" className={styles.menuCard}>
-          <div className={styles.iconWrapper} style={{ backgroundColor: '#ef4444' }}>
-            <Shield size={32} color="white" />
-          </div>
-          <h3>An Ninh Trật Tự</h3>
-          <p>Thông tin liên hệ Công an xã và trực ban</p>
-        </a>
+        <MenuCard 
+          href="/an-ninh"
+          title="AN NINH TRẬT TỰ"
+          description="Số điện thoại trực ban Công an xã và liên hệ bảo đảm ANTT"
+          icon={Shield}
+          color="#dc2626"
+        />
+      </div>
+      
+      <div className={styles.footer}>
+        <p>MỖI NGƯỜI DÂN LÀ MỘT CÔNG DÂN SỐ</p>
+        <p>MỖI GIA ĐÌNH LÀ MỘT GIA ĐÌNH SỐ</p>
       </div>
     </div>
   );
