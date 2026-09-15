@@ -89,7 +89,7 @@ const QRCodePage = () => {
             qrValue={`${window.location.origin}/huong-dan-smart-vinh-long`}
           />
           <QRCodeCard 
-            title="THÔNG TIN CỦA ẤP" 
+            title="THÔNG TIN BÍ THƯ VÀ TRƯỞNG BAN NHÂN DÂN CÁC ẤP" 
             description="Cập nhật thông tin lãnh đạo, thông báo mới nhất của ấp"
             icon={Users}
             color="#059669"
