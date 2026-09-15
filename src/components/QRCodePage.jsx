@@ -112,7 +112,7 @@ const QRCodePage = () => {
           </p>
           <div style={{ maxWidth: '280px', width: '100%' }}>
             <QRCodeCard 
-              title="MÔ HÌNH ẤP SỐ (GỘP CHUNG)" 
+              title="MÔ HÌNH ẤP SỐ" 
               description="Quét mã này để truy cập tất cả tiện ích của Ấp Số"
               icon={QrCode}
               color="#4f46e5"
