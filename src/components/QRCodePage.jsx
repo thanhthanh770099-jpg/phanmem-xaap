@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './QRCodePage.module.css';
-import { Globe, MessageSquare, User, Shield, CreditCard } from 'lucide-react';
+import { Globe, MessageSquare, User, Shield, CreditCard, Smartphone, PlayCircle } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const QRCodeCard = ({ title, description, icon: Icon, color, qrValue }) => (
@@ -38,6 +38,20 @@ const QRCodePage = () => {
           icon={CreditCard}
           color="#06b6d4"
           qrValue={`${window.location.origin}/huong-dan-thanh-toan`}
+        />
+        <QRCodeCard 
+          title="Hướng dẫn kích hoạt VNEID" 
+          description="Quét mã để xem video hướng dẫn kích hoạt tài khoản định danh điện tử VNEID mức độ 2."
+          icon={PlayCircle}
+          color="#db2777"
+          qrValue={`${window.location.origin}/huong-dan-vneid`}
+        />
+        <QRCodeCard 
+          title="Hướng dẫn cài đặt SMART Vĩnh Long" 
+          description="Quét mã để xem hướng dẫn cài đặt và sử dụng ứng dụng SMART Vĩnh Long."
+          icon={Smartphone}
+          color="#8b5cf6"
+          qrValue={`${window.location.origin}/huong-dan-smart-vinh-long`}
         />
         <QRCodeCard 
           title="Cổng Dịch Vụ Công" 

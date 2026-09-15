@@ -13,6 +13,8 @@ import PublicPortal from './components/PublicPortal';
 import PublicAnNinh from './components/PublicAnNinh';
 import UserManagement from './components/UserManagement';
 import PaymentGuide from './components/PaymentGuide';
+import VneidGuide from './components/VneidGuide';
+import SmartVinhLongGuide from './components/SmartVinhLongGuide';
 
 function App() {
   const [activeTab, setActiveTab] = useState(0); // 0 = Dashboard
@@ -73,6 +75,14 @@ function App() {
 
   if (window.location.pathname === '/huong-dan-thanh-toan') {
     return <PaymentGuide />;
+  }
+
+  if (window.location.pathname === '/huong-dan-vneid') {
+    return <VneidGuide />;
+  }
+
+  if (window.location.pathname === '/huong-dan-smart-vinh-long') {
+    return <SmartVinhLongGuide />;
   }
 
   if (!user) {
