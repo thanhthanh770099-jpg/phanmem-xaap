@@ -56,8 +56,8 @@ const PublicPortal = () => {
           <div className={styles.iconWrapper} style={{ backgroundColor: '#10b981' }}>
             <User size={32} color="white" />
           </div>
-          <h3>Thông Tin Lãnh Đạo</h3>
-          <p>Xem thông tin liên hệ của trưởng ấp, phó ấp</p>
+          <h3>Thông tin Bí thư, Trưởng ban nhân dân các ấp</h3>
+          <p>Xem thông tin liên hệ của Bí thư, Trưởng ban nhân dân 20 ấp</p>
         </a>
 
         <a href="/an-ninh" className={styles.menuCard}>

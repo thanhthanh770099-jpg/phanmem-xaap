@@ -68,8 +68,8 @@ const QRCodePage = () => {
           qrValue={`${window.location.origin}/phan-anh`}
         />
         <QRCodeCard 
-          title="Thông Tin Lãnh Đạo Các Ấp" 
-          description="Xem thông tin liên hệ, số điện thoại của trưởng ấp, phó ấp và ban điều hành 20 ấp."
+          title="Thông tin Bí thư, Trưởng ban nhân dân các ấp" 
+          description="Xem thông tin liên hệ, số điện thoại của Bí thư, Trưởng ban nhân dân 20 ấp."
           icon={User}
           color="#10b981"
           qrValue={`${window.location.origin}/danh-sach-lanh-dao`}
@@ -90,7 +90,7 @@ const QRCodePage = () => {
       <div className={styles.qrGrid} style={{ display: 'flex', justifyContent: 'center' }}>
         <QRCodeCard 
           title="Mô hình Ấp Số" 
-          description="Quét mã này để truy cập tất cả 5 tiện ích: Thanh toán KDTM, Dịch vụ công, Phản ánh kiến nghị, Thông tin lãnh đạo các ấp, và An ninh trật tự."
+          description="Quét mã này để truy cập tất cả 5 tiện ích: Thanh toán KDTM, Dịch vụ công, Phản ánh kiến nghị, Thông tin Bí thư và Trưởng ban nhân dân các ấp, và An ninh trật tự."
           icon={Globe}
           color="#8b5cf6"
           qrValue={`${window.location.origin}/cong-dan`}
