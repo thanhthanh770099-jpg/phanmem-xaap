@@ -32,9 +32,9 @@ const ClickableQRCodeCard = ({ title, description, icon: Icon, imageSrc, color, 
 
 const PublicPortal = () => {
   return (
-    <div className={styles.pageWrapper} style={{ overflowX: 'auto' }}>
-      {/* Force a fixed minimum width so it looks exactly like the poster on mobile and allows panning */}
-      <div className={styles.posterContainer} style={{ minWidth: '1024px', margin: '0 auto' }}>
+    <div className={styles.pageWrapper}>
+      {/* Remove fixed width to allow responsive scaling on mobile */}
+      <div className={styles.posterContainer}>
         
         {/* Header Section */}
         <div className={styles.posterHeader}>
