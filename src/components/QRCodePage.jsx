@@ -7,11 +7,17 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
-const QRCodeCard = ({ title, description, icon: Icon, color, qrValue }) => (
+const QRCodeCard = ({ title, description, icon: Icon, imageSrc, color, qrValue }) => (
   <div className={styles.qrCard} style={{ borderColor: color }}>
-    <div className={styles.iconCircle} style={{ backgroundColor: color }}>
-      <Icon size={28} color="white" />
-    </div>
+    {imageSrc ? (
+      <div className={styles.iconImageWrapper}>
+        <img src={imageSrc} alt={title} className={styles.iconImage} />
+      </div>
+    ) : (
+      <div className={styles.iconCircle} style={{ backgroundColor: color }}>
+        <Icon size={28} color="white" />
+      </div>
+    )}
     <h3 className={styles.cardTitle} style={{ color: color }}>{title}</h3>
     <div className={styles.qrWrapper}>
       {qrValue ? (
@@ -51,18 +57,18 @@ const QRCodePage = () => {
             title="CỔNG DỊCH VỤ CÔNG QUỐC GIA" 
             description="Thực hiện thủ tục hành chính mọi lúc, mọi nơi"
             icon={Landmark}
-            color="#2563eb"
+            color="#c2410c"
             qrValue="https://dichvucong.gov.vn/"
           />
           <QRCodeCard 
             title="ỨNG DỤNG ĐỊNH DANH ĐIỆN TỬ (VNeID)" 
             description="Đăng ký, đăng nhập, sử dụng các tiện ích trên VNeID"
-            icon={ShieldCheck}
+            imageSrc="/images/vneid.png"
             color="#16a34a"
             qrValue={`${window.location.origin}/huong-dan-vneid`}
           />
           <QRCodeCard 
-            title="PHẢN ÁNH HIỆN TRƯỜNG KIẾN NGHỊ - GÓP Ý" 
+            title="PHẢN ÁNH - KIẾN NGHỊ CỦA NGƯỜI DÂN" 
             description="Phản ánh kịp thời các vấn đề để chính quyền xử lý"
             icon={MessageSquare}
             color="#ea580c"
@@ -71,14 +77,14 @@ const QRCodePage = () => {
           <QRCodeCard 
             title="THANH TOÁN KHÔNG DÙNG TIỀN MẶT" 
             description="Thanh toán hóa đơn, học phí, viện phí, phí dịch vụ công..."
-            icon={CreditCard}
+            imageSrc="/images/thanh-toan.png"
             color="#9333ea"
             qrValue={`${window.location.origin}/huong-dan-thanh-toan`}
           />
           <QRCodeCard 
             title="ỨNG DỤNG SMART VĨNH LONG" 
             description="Cài đặt và sử dụng các tiện ích đô thị thông minh"
-            icon={Smartphone}
+            imageSrc="/images/smart.png"
             color="#0284c7"
             qrValue={`${window.location.origin}/huong-dan-smart-vinh-long`}
           />

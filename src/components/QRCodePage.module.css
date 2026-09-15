@@ -99,6 +99,22 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
+.iconImageWrapper {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.iconImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px; /* Optional, makes images look a bit smoother */
+}
+
 .cardTitle {
   font-size: 14px;
   font-weight: 800;
