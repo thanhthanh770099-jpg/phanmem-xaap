@@ -80,6 +80,20 @@ const TraCuuBHYTGuide = () => {
             </a>
           </div>
 
+          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+            <img 
+              src="/images/bhyt-guide.jpg" 
+              alt="Hướng dẫn tra cứu BHYT" 
+              style={{ 
+                maxWidth: '100%', 
+                height: 'auto', 
+                borderRadius: '8px', 
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                border: '1px solid #e2e8f0'
+              }} 
+            />
+          </div>
+
           <h3 style={{ color: '#0369a1', marginTop: '25px', marginBottom: '15px', fontSize: '18px' }}>Các bước thực hiện trên Cổng thông tin BHXH Việt Nam:</h3>
           
           <div style={{ 
