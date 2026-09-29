@@ -3,7 +3,7 @@ import styles from './PublicPortal.module.css';
 import { 
   Landmark, ShieldCheck, MessageSquare, 
   CreditCard, Smartphone, Users, 
-  Shield, Star, Heart, Users as UsersIcon, Shield as ShieldIcon
+  Shield, Star, Heart, Users as UsersIcon, Shield as ShieldIcon, Activity
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -110,6 +110,14 @@ const PublicPortal = () => {
             color="#dc2626"
             qrValue={`${window.location.origin}/an-ninh`}
             href="/an-ninh"
+          />
+          <ClickableQRCodeCard 
+            title="TRA CỨU BẢO HIỂM Y TẾ" 
+            description="Tra cứu nhanh thời hạn sử dụng thẻ Bảo hiểm Y tế"
+            icon={Activity}
+            color="#2563eb"
+            qrValue={`${window.location.origin}/huong-dan-tra-cuu-bhyt`}
+            href="/huong-dan-tra-cuu-bhyt"
           />
         </div>
 

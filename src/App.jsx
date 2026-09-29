@@ -15,6 +15,7 @@ import UserManagement from './components/UserManagement';
 import PaymentGuide from './components/PaymentGuide';
 import VneidGuide from './components/VneidGuide';
 import SmartVinhLongGuide from './components/SmartVinhLongGuide';
+import TraCuuBHYTGuide from './components/TraCuuBHYTGuide';
 
 function App() {
   const [activeTab, setActiveTab] = useState(0); // 0 = Dashboard
@@ -83,6 +84,10 @@ function App() {
 
   if (window.location.pathname === '/huong-dan-smart-vinh-long') {
     return <SmartVinhLongGuide />;
+  }
+
+  if (window.location.pathname === '/huong-dan-tra-cuu-bhyt') {
+    return <TraCuuBHYTGuide />;
   }
 
   if (!user) {

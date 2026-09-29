@@ -3,7 +3,7 @@ import styles from './QRCodePage.module.css';
 import { 
   Landmark, ShieldCheck, MessageSquare, 
   CreditCard, Smartphone, Users, 
-  Shield, QrCode, Star, Heart, Users as UsersIcon, Shield as ShieldIcon
+  Shield, QrCode, Star, Heart, Users as UsersIcon, Shield as ShieldIcon, Activity
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -101,6 +101,13 @@ const QRCodePage = () => {
             icon={Shield}
             color="#dc2626"
             qrValue={`${window.location.origin}/`}
+          />
+          <QRCodeCard 
+            title="TRA CỨU BẢO HIỂM Y TẾ" 
+            description="Tra cứu nhanh thời hạn sử dụng thẻ Bảo hiểm Y tế"
+            icon={Activity}
+            color="#2563eb"
+            qrValue={`${window.location.origin}/huong-dan-tra-cuu-bhyt`}
           />
         </div>
 
