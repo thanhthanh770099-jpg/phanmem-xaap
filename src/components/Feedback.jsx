@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, Clock, MessageCircle, Phone, Copy, Check } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, MessageCircle, Phone, Copy, Check, Download } from 'lucide-react';
 import styles from './Feedback.module.css';
 
 const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
@@ -156,15 +156,19 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     return phone.replace(/[^0-9]/g, '');
   };
 
-  const generateResultMessage = (name, content, responseNote) => {
+  const generateResultMessage = (name, content, responseNote, hasFile = false) => {
     const shortContent = content ? (content.length > 50 ? content.substring(0, 50) + '...' : content) : '';
-    return `UBND Xã Châu Thành thông báo kết quả xử lý phản ánh của ông/bà ${name || 'người dân'}:
+    let msg = `UBND Xã Châu Thành thông báo kết quả xử lý phản ánh của ông/bà ${name || 'người dân'}:
 - Vấn đề: "${shortContent}"
-- Kết quả xử lý: ${responseNote || 'Đã được giải quyết.'}
-Trân trọng cảm ơn!`;
+- Kết quả xử lý: ${responseNote || 'Đã được giải quyết.'}`;
+    if (hasFile) {
+      msg += `\n- File công văn: (Đã gửi kèm tệp văn bản / hình ảnh bên dưới)`;
+    }
+    msg += `\nTrân trọng cảm ơn!`;
+    return msg;
   };
 
-  const handleSendZalo = (phone, message) => {
+  const handleSendZalo = (phone, message, hasFile = false) => {
     const clean = getCleanPhone(phone);
     if (!clean) {
       alert('Không tìm thấy số điện thoại của người dân!');
@@ -173,8 +177,12 @@ Trân trọng cảm ơn!`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(message);
     }
-    setZaloNoticeMessage('Đã sao chép nội dung tin nhắn! Bạn chỉ cần nhấn Dán (Ctrl + V) và Gửi trong Zalo.');
-    setTimeout(() => setZaloNoticeMessage(''), 8000);
+    if (hasFile) {
+      setZaloNoticeMessage('Đã sao chép nội dung tin nhắn! Bạn chỉ cần nhấn Dán (Ctrl + V) và kéo thả file công văn đã tải vào Zalo để gửi cho người dân.');
+    } else {
+      setZaloNoticeMessage('Đã sao chép nội dung tin nhắn! Bạn chỉ cần nhấn Dán (Ctrl + V) và Gửi trong Zalo.');
+    }
+    setTimeout(() => setZaloNoticeMessage(''), 10000);
     window.open(`https://zalo.me/${clean}`, '_blank');
   };
 
@@ -202,7 +210,8 @@ Trân trọng cảm ơn!`;
       
       if (!response.ok) throw new Error(data.error || 'Có lỗi xảy ra');
       
-      const msg = generateResultMessage(selectedFeedback.name, selectedFeedback.content, handleData.responseNote);
+      const hasFile = !!handleData.responseFileUrl;
+      const msg = generateResultMessage(selectedFeedback.name, selectedFeedback.content, handleData.responseNote, hasFile);
 
       setHandledSuccessData({
         phone: selectedFeedback.phone,
@@ -441,10 +450,22 @@ Trân trọng cảm ơn!`;
               <button 
                 type="button" 
                 className={styles.zaloBtn}
-                onClick={() => handleSendZalo(handledSuccessData.phone, handledSuccessData.message)}
+                onClick={() => handleSendZalo(handledSuccessData.phone, handledSuccessData.message, !!handledSuccessData.responseFileUrl)}
               >
                 <MessageCircle size={16} /> Gửi qua Zalo ({handledSuccessData.phone})
               </button>
+            )}
+
+            {handledSuccessData.responseFileUrl && (
+              <a 
+                href={handledSuccessData.responseFileUrl} 
+                download={`CongVan_TraLoi_${selectedFeedback?.id || 'XuLy'}`}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.fileDownloadBtn}
+              >
+                <Download size={16} /> Tải file công văn gửi kèm
+              </a>
             )}
 
             <button 
@@ -508,15 +529,31 @@ Trân trọng cảm ơn!`;
                 <button 
                   type="button" 
                   className={styles.zaloBtn}
-                  onClick={() => handleSendZalo(selectedFeedback.phone, generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
+                  onClick={() => handleSendZalo(
+                    selectedFeedback.phone, 
+                    generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note, !!selectedFeedback.response_file_url),
+                    !!selectedFeedback.response_file_url
+                  )}
                 >
                   <MessageCircle size={16} /> Gửi qua Zalo ({selectedFeedback.phone})
                 </button>
 
+                {selectedFeedback.response_file_url && (
+                  <a 
+                    href={selectedFeedback.response_file_url} 
+                    download={`CongVan_TraLoi_${selectedFeedback.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={styles.fileDownloadBtn}
+                  >
+                    <Download size={16} /> Tải file công văn gửi kèm
+                  </a>
+                )}
+
                 <button 
                   type="button" 
                   className={styles.copyBtn}
-                  onClick={() => handleCopyMessage(generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
+                  onClick={() => handleCopyMessage(generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note, !!selectedFeedback.response_file_url))}
                 >
                   {copySuccess ? <Check size={16} color="green" /> : <Copy size={16} />}
                   {copySuccess ? 'Đã sao chép!' : 'Sao chép nội dung'}
