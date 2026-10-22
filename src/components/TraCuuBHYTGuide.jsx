@@ -1,18 +1,24 @@
 import React from 'react';
 import { ExternalLink } from 'lucide-react';
+import BackToPortalButton from './BackToPortalButton';
 
 const TraCuuBHYTGuide = () => {
   return (
     <div style={{ 
-      minHeight: '100vh', 
+      height: '100vh',
+      overflowY: 'auto',
       backgroundColor: '#f0f9ff', 
       backgroundImage: 'linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%)',
       display: 'flex', 
+      flexDirection: 'column',
       alignItems: 'center', 
-      justifyContent: 'center', 
       padding: '20px',
-      fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+      fontFamily: "'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      boxSizing: 'border-box'
     }}>
+      <div style={{ maxWidth: '800px', width: '100%', display: 'flex', justifyContent: 'flex-start' }}>
+        <BackToPortalButton />
+      </div>
       <div style={{ 
         maxWidth: '800px', 
         width: '100%',
@@ -21,8 +27,7 @@ const TraCuuBHYTGuide = () => {
         boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
         overflow: 'hidden',
         display: 'flex',
-        flexDirection: 'column',
-        maxHeight: '90vh'
+        flexDirection: 'column'
       }}>
         <div style={{ 
           padding: '24px 30px', 

@@ -1,10 +1,14 @@
 import React from 'react';
 import lanhDaoData from '../data/lanh-dao.json';
 import styles from './Feedback.module.css';
+import BackToPortalButton from './BackToPortalButton';
 
 const PublicDanhSachLanhDao = () => {
   return (
     <div style={{ backgroundColor: '#f4f7f6', height: '100vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px', boxSizing: 'border-box' }}>
+      <div style={{ width: '100%', maxWidth: '800px', display: 'flex', justifyContent: 'flex-start' }}>
+        <BackToPortalButton />
+      </div>
       <div className={styles.container} style={{ margin: 0, width: '100%', maxWidth: '800px' }}>
         <h2 className={styles.title} style={{ textAlign: 'center', marginBottom: '10px' }}>Thông tin Bí thư, Trưởng ban nhân dân các ấp</h2>
         <p style={{ textAlign: 'center', color: '#666', marginBottom: '24px' }}>

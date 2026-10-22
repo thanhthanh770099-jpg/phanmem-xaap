@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import anNinhData from '../data/an-ninh.json';
 import styles from './PublicAnNinh.module.css';
-import { Shield, Phone, Search, ArrowLeft, PhoneCall, Filter } from 'lucide-react';
+import { Shield, Phone, Search } from 'lucide-react';
+import BackToPortalButton from './BackToPortalButton';
 
 const PublicAnNinh = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,9 +38,7 @@ const PublicAnNinh = () => {
   return (
     <div className={styles.container}>
       <div className={styles.contentWrapper}>
-        <a href="/cong-dan" className={styles.backBtn}>
-          <ArrowLeft size={16} /> Quay lại Mô hình Ấp Số
-        </a>
+        <BackToPortalButton />
 
         {/* Header Banner */}
         <div className={styles.headerCard}>
@@ -50,19 +49,6 @@ const PublicAnNinh = () => {
           <p className={styles.subtitle}>
             Công an Xã Châu Thành &bull; Danh sách Tổ bảo vệ ANTT các ấp sau kiện toàn
           </p>
-        </div>
-
-        {/* Hotline Box */}
-        <div className={styles.hotlineBox}>
-          <div className={styles.hotlineInfo}>
-            <h3>
-              <Shield size={18} /> Trực Ban Công An Xã Châu Thành
-            </h3>
-            <p>Tiếp nhận tin báo tội phạm, phản ánh ANTT và hỗ trợ khẩn cấp 24/7</p>
-          </div>
-          <a href="tel:02703872224" className={styles.hotlineCallBtn}>
-            <PhoneCall size={16} /> Gọi Trực Ban
-          </a>
         </div>
 
         {/* Search & Filter Controls */}
