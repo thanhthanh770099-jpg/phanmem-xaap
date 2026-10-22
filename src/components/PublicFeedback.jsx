@@ -7,6 +7,7 @@ const PublicFeedback = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    email: '',
     hamletId: '',
     content: '',
     imageUrl: ''
@@ -60,6 +61,10 @@ const PublicFeedback = () => {
       setStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại liên hệ để nhận phản hồi.' });
       return;
     }
+    if (!formData.email || !formData.email.trim()) {
+      setStatus({ type: 'error', message: 'Vui lòng nhập địa chỉ Email / Gmail để nhận kết quả xử lý.' });
+      return;
+    }
     setIsSubmitting(true);
     setStatus({ type: '', message: '' });
 
@@ -74,12 +79,13 @@ const PublicFeedback = () => {
       
       if (!response.ok) throw new Error(data.error || 'Có lỗi xảy ra');
       
-      setStatus({ type: 'success', message: 'Ghi nhận ý kiến thành công! Cảm ơn bạn đã phản ánh.' });
+      setStatus({ type: 'success', message: 'Ghi nhận ý kiến thành công! Kết quả giải quyết sẽ được gửi tự động về Email của bạn.' });
       
       setFormData(prev => ({
         ...prev,
         name: '',
         phone: '',
+        email: '',
         content: '',
         imageUrl: ''
       }));
@@ -99,7 +105,7 @@ const PublicFeedback = () => {
       <div className={styles.container} style={{ margin: 0, width: '100%', maxWidth: '600px' }}>
         <h2 className={styles.title} style={{ textAlign: 'center', marginBottom: '24px' }}>Cổng Phản Ánh Kiến Nghị</h2>
         <p style={{ textAlign: 'center', color: '#666', marginBottom: '24px' }}>
-          Vui lòng điền thông tin và nội dung phản ánh để gửi đến Ban Lãnh đạo các Ấp thuộc Xã Châu Thành.
+          Vui lòng điền thông tin và nội dung phản ánh để gửi đến Ban Lãnh đạo các Ấp. Kết quả xử lý sẽ được gửi tự động về địa chỉ Email của bạn.
         </p>
 
         {status.message && (
@@ -125,6 +131,18 @@ const PublicFeedback = () => {
               placeholder="Ví dụ: 0912345678"
               pattern="[0-9]{10,11}"
               title="Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)"
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Địa chỉ Email / Gmail nhận kết quả <span style={{color: 'red'}}>*</span></label>
+            <input 
+              type="email" 
+              name="email" 
+              value={formData.email} 
+              onChange={handleChange} 
+              className={styles.input} 
+              required 
+              placeholder="Ví dụ: nguyenvana@gmail.com"
             />
           </div>
           <div className={styles.formGroup}>

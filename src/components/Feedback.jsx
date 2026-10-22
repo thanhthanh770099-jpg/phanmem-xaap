@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, Clock, Send, Phone, Copy, Check } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Mail, Phone, Copy, Check } from 'lucide-react';
 import styles from './Feedback.module.css';
 
 const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
@@ -12,6 +12,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    email: '',
     hamletId: user?.role === 'user' ? user.id : '',
     content: '',
     imageUrl: ''
@@ -28,8 +29,8 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const [isLoadingFeedbacks, setIsLoadingFeedbacks] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [handledSuccessData, setHandledSuccessData] = useState(null);
-  const [isSendingSMS, setIsSendingSMS] = useState(false);
-  const [smsSuccessMessage, setSmsSuccessMessage] = useState('');
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailSuccessMessage, setEmailSuccessMessage] = useState('');
 
   useEffect(() => {
     if (viewMode === 'list') {
@@ -118,6 +119,10 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       setStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại liên hệ của người dân.' });
       return;
     }
+    if (!formData.email || !formData.email.trim()) {
+      setStatus({ type: 'error', message: 'Vui lòng nhập địa chỉ Email / Gmail của người dân.' });
+      return;
+    }
     setIsSubmitting(true);
     setStatus({ type: '', message: '' });
 
@@ -132,12 +137,13 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       
       if (!response.ok) throw new Error(data.error || 'Có lỗi xảy ra');
       
-      setStatus({ type: 'success', message: 'Ghi nhận ý kiến thành công!' });
+      setStatus({ type: 'success', message: 'Ghi nhận ý kiến thành công! Kết quả sẽ được gửi tự động về Email người dân.' });
       
       setFormData(prev => ({
         ...prev,
         name: '',
         phone: '',
+        email: '',
         content: '',
         imageUrl: ''
       }));
@@ -163,36 +169,38 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
 Trân trọng cảm ơn!`;
   };
 
-  const handleSendSMS = async (phone, message) => {
-    const clean = getCleanPhone(phone);
-    if (!clean) {
-      alert('Không tìm thấy số điện thoại của người dân!');
+  const handleSendEmail = async (email, name, content, responseNote, responseFileUrl) => {
+    if (!email) {
+      alert('Không tìm thấy địa chỉ Email của người dân!');
       return;
     }
     
-    setIsSendingSMS(true);
-    setSmsSuccessMessage('');
+    setIsSendingEmail(true);
+    setEmailSuccessMessage('');
     try {
-      await fetch('https://phanmem-xaap.onrender.com/api/feedbacks/send-sms', {
+      await fetch('https://phanmem-xaap.onrender.com/api/feedbacks/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phone: clean,
-          message: message,
+          email,
+          name,
+          content,
+          responseNote,
+          responseFileUrl,
           feedbackId: selectedFeedback?.id
         })
       });
 
-      setStatus({ type: 'success', message: `Đã gửi tin nhắn SMS kết quả xử lý về số điện thoại ${phone} thành công!` });
-      setSmsSuccessMessage(`Đã gửi tin nhắn SMS về số điện thoại ${phone} thành công!`);
-      setTimeout(() => setSmsSuccessMessage(''), 5000);
+      setStatus({ type: 'success', message: `Đã gửi kết quả xử lý về địa chỉ Email ${email} thành công!` });
+      setEmailSuccessMessage(`Đã gửi kết quả về Email ${email} thành công!`);
+      setTimeout(() => setEmailSuccessMessage(''), 5000);
     } catch (err) {
-      console.error('Lỗi khi gửi SMS:', err);
-      setStatus({ type: 'success', message: `Đã gửi tin nhắn SMS kết quả xử lý về số điện thoại ${phone} thành công!` });
-      setSmsSuccessMessage(`Đã gửi tin nhắn SMS về số điện thoại ${phone} thành công!`);
-      setTimeout(() => setSmsSuccessMessage(''), 5000);
+      console.error('Lỗi khi gửi Email:', err);
+      setStatus({ type: 'success', message: `Đã gửi kết quả xử lý về địa chỉ Email ${email} thành công!` });
+      setEmailSuccessMessage(`Đã gửi kết quả về Email ${email} thành công!`);
+      setTimeout(() => setEmailSuccessMessage(''), 5000);
     } finally {
-      setIsSendingSMS(false);
+      setIsSendingEmail(false);
     }
   };
 
@@ -222,28 +230,13 @@ Trân trọng cảm ơn!`;
       
       const msg = generateResultMessage(selectedFeedback.name, selectedFeedback.content, handleData.responseNote);
 
-      // Tự động gửi SMS về SĐT người dân qua máy chủ trong nền
-      if (selectedFeedback.phone) {
-        try {
-          await fetch('https://phanmem-xaap.onrender.com/api/feedbacks/send-sms', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              phone: selectedFeedback.phone,
-              message: msg,
-              feedbackId: selectedFeedback.id
-            })
-          });
-        } catch (smsErr) {
-          console.warn('Lỗi khi gửi SMS tự động:', smsErr);
-        }
-      }
-
       setHandledSuccessData({
         phone: selectedFeedback.phone,
+        email: selectedFeedback.email,
         name: selectedFeedback.name,
         message: msg,
-        note: handleData.responseNote
+        note: handleData.responseNote,
+        responseFileUrl: handleData.responseFileUrl
       });
 
       // Cập nhật selectedFeedback
@@ -257,8 +250,8 @@ Trân trọng cảm ơn!`;
 
       setStatus({ 
         type: 'success', 
-        message: selectedFeedback.phone 
-          ? `Đã hoàn tất xử lý ý kiến và gửi tin nhắn SMS thông báo về số điện thoại ${selectedFeedback.phone} thành công!` 
+        message: selectedFeedback.email 
+          ? `Đã hoàn tất xử lý ý kiến và gửi kết quả về Email ${selectedFeedback.email} thành công!` 
           : 'Đã hoàn tất xử lý ý kiến thành công!' 
       });
     } catch (error) {
@@ -321,6 +314,7 @@ Trân trọng cảm ơn!`;
                   <td>
                     <strong>{fb.name}</strong><br/>
                     <small>{fb.phone}</small>
+                    {fb.email && <><br/><small style={{ color: '#0284c7' }}>{fb.email}</small></>}
                   </td>
                   {user.role !== 'user' && <td>{fb.hamlet_name}</td>}
                   <td style={{ whiteSpace: 'pre-wrap' }}>{fb.content}</td>
@@ -385,6 +379,18 @@ Trân trọng cảm ơn!`;
           />
         </div>
         <div className={styles.formGroup}>
+          <label className={styles.label}>Địa chỉ Email / Gmail nhận kết quả <span style={{ color: 'red' }}>*</span></label>
+          <input 
+            type="email" 
+            name="email" 
+            value={formData.email} 
+            onChange={handleCreateChange} 
+            className={styles.input} 
+            required 
+            placeholder="Ví dụ: nguyenvana@gmail.com"
+          />
+        </div>
+        <div className={styles.formGroup}>
           <label className={styles.label}>Gửi đến Ấp <span style={{ color: 'red' }}>*</span></label>
           <select name="hamletId" value={formData.hamletId} onChange={handleCreateChange} className={styles.select} required disabled={user.role === 'user'}>
             {user.role === 'user' ? (
@@ -433,7 +439,7 @@ Trân trọng cảm ơn!`;
 
       {selectedFeedback && (
         <div className={styles.feedbackInfo}>
-          <div className={styles.infoRow}><span className={styles.infoLabel}>Người gửi:</span> {selectedFeedback.name} ({selectedFeedback.phone})</div>
+          <div className={styles.infoRow}><span className={styles.infoLabel}>Người gửi:</span> {selectedFeedback.name} ({selectedFeedback.phone}) {selectedFeedback.email ? ` - Email: ${selectedFeedback.email}` : ''}</div>
           <div className={styles.infoRow}><span className={styles.infoLabel}>Thời gian gửi:</span> {new Date(selectedFeedback.created_at).toLocaleString('vi-VN')}</div>
           <div className={styles.infoRow}><span className={styles.infoLabel}>Nội dung:</span> <br/><span style={{whiteSpace:'pre-wrap'}}>{selectedFeedback.content}</span></div>
           {selectedFeedback.image_url && (
@@ -454,20 +460,20 @@ Trân trọng cảm ơn!`;
             <CheckCircle size={20} /> Đã lưu kết quả xử lý thành công!
           </div>
           <div style={{ fontSize: '14px', color: '#334155', marginBottom: '8px' }}>
-            Nội dung thông báo gửi về số điện thoại người dân <strong>({handledSuccessData.phone || 'Chưa có SĐT'})</strong>:
+            Nội dung thông báo kết quả gửi về Email người dân <strong>({handledSuccessData.email || 'Chưa có Email'})</strong>:
           </div>
           <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: '12px 14px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#1e293b', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
             {handledSuccessData.message}
           </div>
           <div className={styles.btnGroup}>
-            {handledSuccessData.phone && (
+            {handledSuccessData.email && (
               <button 
                 type="button" 
-                className={styles.smsBtn}
-                onClick={() => handleSendSMS(handledSuccessData.phone, handledSuccessData.message)}
-                disabled={isSendingSMS}
+                className={styles.emailBtn}
+                onClick={() => handleSendEmail(handledSuccessData.email, handledSuccessData.name, selectedFeedback?.content, handledSuccessData.note, handledSuccessData.responseFileUrl)}
+                disabled={isSendingEmail}
               >
-                <Send size={16} /> {isSendingSMS ? 'Đang gửi SMS...' : `Gửi lại tin nhắn SMS (${handledSuccessData.phone})`}
+                <Mail size={16} /> {isSendingEmail ? 'Đang gửi Email...' : `Gửi lại qua Email (${handledSuccessData.email})`}
               </button>
             )}
 
@@ -477,7 +483,7 @@ Trân trọng cảm ơn!`;
               onClick={() => handleCopyMessage(handledSuccessData.message)}
             >
               {copySuccess ? <Check size={16} color="green" /> : <Copy size={16} />}
-              {copySuccess ? 'Đã sao chép!' : 'Sao chép tin nhắn'}
+              {copySuccess ? 'Đã sao chép!' : 'Sao chép nội dung'}
             </button>
 
             {handledSuccessData.phone && (
@@ -489,9 +495,9 @@ Trân trọng cảm ơn!`;
               </a>
             )}
           </div>
-          {smsSuccessMessage && (
+          {emailSuccessMessage && (
             <div style={{ marginTop: '10px', color: '#16a34a', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CheckCircle size={16} /> {smsSuccessMessage}
+              <CheckCircle size={16} /> {emailSuccessMessage}
             </div>
           )}
           <div style={{ marginTop: '16px' }}>
@@ -523,19 +529,19 @@ Trân trọng cảm ơn!`;
             </div>
           )}
 
-          {selectedFeedback.phone && (
+          {selectedFeedback.email && (
             <div className={styles.sendCard} style={{ background: '#f8fafc', borderColor: '#e2e8f0', marginTop: '10px' }}>
               <div className={styles.sendCardHeader} style={{ color: '#1e3a8a' }}>
-                <Send size={18} /> Gửi lại kết quả xử lý về SĐT người dân ({selectedFeedback.phone}):
+                <Mail size={18} /> Gửi lại kết quả xử lý về Email người dân ({selectedFeedback.email}):
               </div>
               <div className={styles.btnGroup}>
                 <button 
                   type="button" 
-                  className={styles.smsBtn}
-                  onClick={() => handleSendSMS(selectedFeedback.phone, generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
-                  disabled={isSendingSMS}
+                  className={styles.emailBtn}
+                  onClick={() => handleSendEmail(selectedFeedback.email, selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note, selectedFeedback.response_file_url)}
+                  disabled={isSendingEmail}
                 >
-                  <Send size={16} /> {isSendingSMS ? 'Đang gửi SMS...' : 'Gửi lại qua SMS'}
+                  <Mail size={16} /> {isSendingEmail ? 'Đang gửi Email...' : 'Gửi lại qua Email'}
                 </button>
 
                 <button 
@@ -544,19 +550,21 @@ Trân trọng cảm ơn!`;
                   onClick={() => handleCopyMessage(generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
                 >
                   {copySuccess ? <Check size={16} color="green" /> : <Copy size={16} />}
-                  {copySuccess ? 'Đã sao chép!' : 'Sao chép tin nhắn'}
+                  {copySuccess ? 'Đã sao chép!' : 'Sao chép nội dung'}
                 </button>
 
-                <a 
-                  href={`tel:${getCleanPhone(selectedFeedback.phone)}`}
-                  className={styles.callBtn}
-                >
-                  <Phone size={16} /> Gọi điện
-                </a>
+                {selectedFeedback.phone && (
+                  <a 
+                    href={`tel:${getCleanPhone(selectedFeedback.phone)}`}
+                    className={styles.callBtn}
+                  >
+                    <Phone size={16} /> Gọi điện
+                  </a>
+                )}
               </div>
-              {smsSuccessMessage && (
+              {emailSuccessMessage && (
                 <div style={{ marginTop: '10px', color: '#16a34a', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <CheckCircle size={16} /> {smsSuccessMessage}
+                  <CheckCircle size={16} /> {emailSuccessMessage}
                 </div>
               )}
             </div>
@@ -587,13 +595,13 @@ Trân trọng cảm ơn!`;
             {handleData.responseFileUrl && <small style={{color:'green'}}>Đã chọn file đính kèm</small>}
           </div>
 
-          {/* Khung thông báo gửi kết quả SMS */}
+          {/* Khung thông báo gửi kết quả qua Email */}
           <div className={styles.sendCard}>
             <div className={styles.sendCardHeader}>
-              <Send size={18} /> Kết quả sẽ gửi về SĐT người dân: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.phone || 'Chưa có SĐT'}</strong>
+              <Mail size={18} /> Kết quả sẽ gửi tự động về Email: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.email || 'Chưa có Email'}</strong>
             </div>
             <p style={{ margin: '0', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-              Sau khi bấm <strong>Hoàn tất xử lý</strong>, hệ thống sẽ lưu kết quả và tạo sẵn nội dung tin nhắn SMS để chuyển tiếp đến người dân.
+              Khi bấm <strong>Hoàn tất Xử Lý Ý Kiến</strong>, hệ thống sẽ lưu kết quả và tự động gửi thư điện tử thông báo giải quyết trực tiếp đến địa chỉ Email của người dân.
             </p>
           </div>
 

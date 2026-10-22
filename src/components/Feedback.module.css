@@ -252,6 +252,27 @@
 }
 
 
+.emailBtn {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.emailBtn:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
 .smsBtn {
   background-color: #059669;
   color: #ffffff;

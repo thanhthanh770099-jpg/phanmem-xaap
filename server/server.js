@@ -360,17 +360,83 @@ app.put('/api/documents/:id/complete', async (req, res) => {
   }
 });
 
+const nodemailer = require('nodemailer');
+
+// Cấu hình gửi mail qua SMTP (Gmail / Outlook / Mail server)
+const mailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || ''
+  }
+});
+
+async function sendFeedbackEmail(email, name, content, responseNote, responseFileUrl, hamletName) {
+  if (!email) return;
+
+  const mailOptions = {
+    from: `"UBND Xã Châu Thành - Ấp Thông Minh" <${process.env.SMTP_USER || 'phanmem.xaap@gmail.com'}>`,
+    to: email,
+    subject: `[UBND Xã Châu Thành] Thông báo kết quả xử lý phản ánh, kiến nghị`,
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #ffffff;">
+        <div style="background-color: #1e3c72; color: #ffffff; padding: 24px 20px; text-align: center;">
+          <h2 style="margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px;">UBND XÃ CHÂU THÀNH</h2>
+          <p style="margin: 6px 0 0; font-size: 14px; opacity: 0.9;">Mô hình Ấp Thông Minh - Kết quả xử lý ý kiến phản ánh</p>
+        </div>
+        <div style="padding: 24px;">
+          <p style="font-size: 15px; margin-top: 0;">Kính gửi Ông/Bà: <strong style="color: #1e3c72;">${name || 'Người dân'}</strong>,</p>
+          <p style="font-size: 14px; color: #334155;">UBND Xã Châu Thành đã tiếp nhận và giải quyết nội dung phản ánh, kiến nghị của Ông/Bà gửi đến <strong>${hamletName || 'Ban Lãnh đạo Ấp'}</strong>.</p>
+          
+          <div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 14px 16px; margin: 18px 0; border-radius: 4px;">
+            <p style="margin: 0 0 6px; font-weight: bold; color: #1e40af; font-size: 13px; text-transform: uppercase;">Nội dung phản ánh:</p>
+            <p style="margin: 0; font-style: italic; color: #334155; white-space: pre-wrap;">"${content}"</p>
+          </div>
+
+          <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 16px; margin: 18px 0; border-radius: 4px;">
+            <p style="margin: 0 0 6px; font-weight: bold; color: #166534; font-size: 13px; text-transform: uppercase;">Kết quả giải quyết / Xử lý:</p>
+            <p style="margin: 0; color: #14532d; font-size: 15px; font-weight: 500; white-space: pre-wrap;">${responseNote || 'Đã được ghi nhận và giải quyết.'}</p>
+          </div>
+
+          ${responseFileUrl ? `
+            <div style="margin: 20px 0; text-align: center;">
+              <a href="${responseFileUrl}" target="_blank" style="background-color: #1e3c72; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 14px;">
+                📄 Xem / Tải công văn đính kèm
+              </a>
+            </div>
+          ` : ''}
+
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
+          <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.5;">
+            Trân trọng cảm ơn sự quan tâm và đóng góp ý kiến xây dựng địa phương của Ông/Bà!
+          </p>
+        </div>
+        <div style="background: #f1f5f9; padding: 14px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0;">
+          Thư này được gửi tự động từ Hệ thống Cổng Thông tin Ấp Thông Minh - UBND Xã Châu Thành.
+        </div>
+      </div>
+    `
+  };
+
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    await mailTransporter.sendMail(mailOptions);
+    console.log(`[EMAIL] Đã gửi email kết quả thành công tới: ${email}`);
+  } else {
+    console.log(`[EMAIL MOCK - CHƯA ĐẶT SMTP_USER/PASS] Chuẩn bị gửi email kết quả tới: ${email}`);
+  }
+}
+
 // API 4: Lưu ý kiến người dân
 app.post('/api/feedbacks', async (req, res) => {
-  const { name, phone, hamletId, content, imageUrl } = req.body;
-  if (!name || !phone || !hamletId || !content) {
-    return res.status(400).json({ error: 'Vui lòng điền đầy đủ các thông tin bắt buộc (họ tên, số điện thoại, ấp, nội dung)' });
+  const { name, phone, email, hamletId, content, imageUrl } = req.body;
+  if (!name || !phone || !email || !hamletId || !content) {
+    return res.status(400).json({ error: 'Vui lòng điền đầy đủ các thông tin bắt buộc (họ tên, số điện thoại, email, ấp, nội dung)' });
   }
 
   try {
     await pool.query(
-      'INSERT INTO citizen_feedbacks (name, phone, hamlet_id, content, image_url) VALUES ($1, $2, $3, $4, $5)',
-      [name, phone, hamletId, content, imageUrl || null]
+      'INSERT INTO citizen_feedbacks (name, phone, email, hamlet_id, content, image_url) VALUES ($1, $2, $3, $4, $5, $6)',
+      [name, phone, email, hamletId, content, imageUrl || null]
     );
     res.json({ message: 'Gửi ý kiến thành công' });
   } catch (error) {
@@ -430,37 +496,52 @@ app.put('/api/feedbacks/:id/handle', async (req, res) => {
   const { responseNote, responseFileUrl } = req.body;
 
   try {
-    await pool.query(
+    const { rows } = await pool.query(
       `UPDATE citizen_feedbacks 
        SET status = 'handled', response_note = $1, response_file_url = $2, handled_at = CURRENT_TIMESTAMP
-       WHERE id = $3`,
+       WHERE id = $3
+       RETURNING *`,
       [responseNote, responseFileUrl, id]
     );
-    res.json({ message: 'Đã xử lý ý kiến thành công' });
+
+    if (rows.length > 0) {
+      const fb = rows[0];
+      let hamletName = '';
+      if (fb.hamlet_id) {
+        const uRes = await pool.query('SELECT name FROM users WHERE id = $1', [fb.hamlet_id]);
+        if (uRes.rows.length > 0) hamletName = uRes.rows[0].name;
+      }
+      if (fb.email) {
+        try {
+          await sendFeedbackEmail(fb.email, fb.name, fb.content, responseNote, responseFileUrl, hamletName);
+        } catch (mailErr) {
+          console.error('Lỗi khi gửi email tự động:', mailErr);
+        }
+      }
+    }
+
+    res.json({ message: 'Đã xử lý ý kiến và gửi email thông báo thành công' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// API 5.3: Gửi tin nhắn SMS kết quả xử lý
-app.post('/api/feedbacks/send-sms', async (req, res) => {
-  const { phone, message, feedbackId } = req.body;
-  if (!phone) {
-    return res.status(400).json({ error: 'Không tìm thấy số điện thoại người nhận' });
+// API 5.3: Gửi lại email kết quả xử lý
+app.post('/api/feedbacks/send-email', async (req, res) => {
+  const { email, name, content, responseNote, responseFileUrl, hamletName } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Không tìm thấy địa chỉ email người nhận' });
   }
 
   try {
-    console.log(`[SMS SERVICE] Gửi SMS thông báo kết quả đến số: ${phone}`);
-    console.log(`[SMS SERVICE] Nội dung: ${message}`);
-
-    // Ghi nhận và phản hồi thành công trực tiếp không bật cửa sổ client
+    await sendFeedbackEmail(email, name, content, responseNote, responseFileUrl, hamletName);
     res.json({ 
       success: true, 
-      message: `Đã gửi tin nhắn SMS kết quả về số điện thoại ${phone} thành công!` 
+      message: `Đã gửi kết quả xử lý về địa chỉ Email ${email} thành công!` 
     });
   } catch (error) {
-    console.error('Lỗi khi gửi SMS:', error);
-    res.status(500).json({ error: 'Không thể gửi tin nhắn SMS: ' + error.message });
+    console.error('Lỗi khi gửi email:', error);
+    res.status(500).json({ error: 'Không thể gửi email: ' + error.message });
   }
 });
 
