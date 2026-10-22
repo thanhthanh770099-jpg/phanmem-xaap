@@ -58,7 +58,7 @@ const PublicFeedback = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.phone || !formData.phone.trim()) {
-      setStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại liên hệ để nhận phản hồi.' });
+      setStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại liên hệ của bạn.' });
       return;
     }
     if (!formData.email || !formData.email.trim()) {
