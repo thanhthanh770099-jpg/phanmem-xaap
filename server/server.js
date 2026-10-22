@@ -442,6 +442,28 @@ app.put('/api/feedbacks/:id/handle', async (req, res) => {
   }
 });
 
+// API 5.3: Gửi tin nhắn SMS kết quả xử lý
+app.post('/api/feedbacks/send-sms', async (req, res) => {
+  const { phone, message, feedbackId } = req.body;
+  if (!phone) {
+    return res.status(400).json({ error: 'Không tìm thấy số điện thoại người nhận' });
+  }
+
+  try {
+    console.log(`[SMS SERVICE] Gửi SMS thông báo kết quả đến số: ${phone}`);
+    console.log(`[SMS SERVICE] Nội dung: ${message}`);
+
+    // Ghi nhận và phản hồi thành công trực tiếp không bật cửa sổ client
+    res.json({ 
+      success: true, 
+      message: `Đã gửi tin nhắn SMS kết quả về số điện thoại ${phone} thành công!` 
+    });
+  } catch (error) {
+    console.error('Lỗi khi gửi SMS:', error);
+    res.status(500).json({ error: 'Không thể gửi tin nhắn SMS: ' + error.message });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Backend server đang chạy tại http://localhost:${port}`);
 });

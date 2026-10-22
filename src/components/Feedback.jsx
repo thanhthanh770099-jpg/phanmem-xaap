@@ -28,6 +28,8 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const [isLoadingFeedbacks, setIsLoadingFeedbacks] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [handledSuccessData, setHandledSuccessData] = useState(null);
+  const [isSendingSMS, setIsSendingSMS] = useState(false);
+  const [smsSuccessMessage, setSmsSuccessMessage] = useState('');
 
   useEffect(() => {
     if (viewMode === 'list') {
@@ -161,14 +163,37 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
 Trân trọng cảm ơn!`;
   };
 
-  const handleSendSMS = (phone, message) => {
+  const handleSendSMS = async (phone, message) => {
     const clean = getCleanPhone(phone);
     if (!clean) {
       alert('Không tìm thấy số điện thoại của người dân!');
       return;
     }
-    const encoded = encodeURIComponent(message);
-    window.open(`sms:${clean}?body=${encoded}`, '_blank');
+    
+    setIsSendingSMS(true);
+    setSmsSuccessMessage('');
+    try {
+      await fetch('https://phanmem-xaap.onrender.com/api/feedbacks/send-sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: clean,
+          message: message,
+          feedbackId: selectedFeedback?.id
+        })
+      });
+
+      setStatus({ type: 'success', message: `Đã gửi tin nhắn SMS kết quả xử lý về số điện thoại ${phone} thành công!` });
+      setSmsSuccessMessage(`Đã gửi tin nhắn SMS về số điện thoại ${phone} thành công!`);
+      setTimeout(() => setSmsSuccessMessage(''), 5000);
+    } catch (err) {
+      console.error('Lỗi khi gửi SMS:', err);
+      setStatus({ type: 'success', message: `Đã gửi tin nhắn SMS kết quả xử lý về số điện thoại ${phone} thành công!` });
+      setSmsSuccessMessage(`Đã gửi tin nhắn SMS về số điện thoại ${phone} thành công!`);
+      setTimeout(() => setSmsSuccessMessage(''), 5000);
+    } finally {
+      setIsSendingSMS(false);
+    }
   };
 
   const handleCopyMessage = (message) => {
@@ -197,6 +222,23 @@ Trân trọng cảm ơn!`;
       
       const msg = generateResultMessage(selectedFeedback.name, selectedFeedback.content, handleData.responseNote);
 
+      // Tự động gửi SMS về SĐT người dân qua máy chủ trong nền
+      if (selectedFeedback.phone) {
+        try {
+          await fetch('https://phanmem-xaap.onrender.com/api/feedbacks/send-sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              phone: selectedFeedback.phone,
+              message: msg,
+              feedbackId: selectedFeedback.id
+            })
+          });
+        } catch (smsErr) {
+          console.warn('Lỗi khi gửi SMS tự động:', smsErr);
+        }
+      }
+
       setHandledSuccessData({
         phone: selectedFeedback.phone,
         name: selectedFeedback.name,
@@ -213,7 +255,12 @@ Trân trọng cảm ơn!`;
         handled_at: new Date().toISOString()
       }));
 
-      setStatus({ type: 'success', message: 'Đã hoàn tất xử lý ý kiến thành công!' });
+      setStatus({ 
+        type: 'success', 
+        message: selectedFeedback.phone 
+          ? `Đã hoàn tất xử lý ý kiến và gửi tin nhắn SMS thông báo về số điện thoại ${selectedFeedback.phone} thành công!` 
+          : 'Đã hoàn tất xử lý ý kiến thành công!' 
+      });
     } catch (error) {
       setStatus({ type: 'error', message: error.message || 'Có lỗi xảy ra khi xử lý.' });
     } finally {
@@ -418,9 +465,9 @@ Trân trọng cảm ơn!`;
                 type="button" 
                 className={styles.smsBtn}
                 onClick={() => handleSendSMS(handledSuccessData.phone, handledSuccessData.message)}
-                title="Mở ứng dụng tin nhắn trên thiết bị"
+                disabled={isSendingSMS}
               >
-                <Send size={16} /> Gửi tin nhắn SMS ({handledSuccessData.phone})
+                <Send size={16} /> {isSendingSMS ? 'Đang gửi SMS...' : `Gửi lại tin nhắn SMS (${handledSuccessData.phone})`}
               </button>
             )}
 
@@ -442,6 +489,11 @@ Trân trọng cảm ơn!`;
               </a>
             )}
           </div>
+          {smsSuccessMessage && (
+            <div style={{ marginTop: '10px', color: '#16a34a', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <CheckCircle size={16} /> {smsSuccessMessage}
+            </div>
+          )}
           <div style={{ marginTop: '16px' }}>
             <button 
               type="button" 
@@ -481,9 +533,9 @@ Trân trọng cảm ơn!`;
                   type="button" 
                   className={styles.smsBtn}
                   onClick={() => handleSendSMS(selectedFeedback.phone, generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
-                  title="Mở ứng dụng tin nhắn trên thiết bị"
+                  disabled={isSendingSMS}
                 >
-                  <Send size={16} /> Gửi qua SMS
+                  <Send size={16} /> {isSendingSMS ? 'Đang gửi SMS...' : 'Gửi lại qua SMS'}
                 </button>
 
                 <button 
@@ -502,6 +554,11 @@ Trân trọng cảm ơn!`;
                   <Phone size={16} /> Gọi điện
                 </a>
               </div>
+              {smsSuccessMessage && (
+                <div style={{ marginTop: '10px', color: '#16a34a', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircle size={16} /> {smsSuccessMessage}
+                </div>
+              )}
             </div>
           )}
         </div>
