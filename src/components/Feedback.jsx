@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Send, MessageCircle, Phone, Copy, Check } from 'lucide-react';
 import styles from './Feedback.module.css';
 
 const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
@@ -26,6 +26,9 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const [status, setStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingFeedbacks, setIsLoadingFeedbacks] = useState(false);
+  const [autoSendMethod, setAutoSendMethod] = useState('zalo'); // 'zalo' | 'sms' | 'manual'
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [handledSuccessData, setHandledSuccessData] = useState(null);
 
   useEffect(() => {
     if (viewMode === 'list') {
@@ -142,6 +145,49 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     }
   };
 
+  const getCleanPhone = (phone) => {
+    if (!phone) return '';
+    return phone.replace(/[^0-9]/g, '');
+  };
+
+  const generateResultMessage = (name, content, responseNote) => {
+    const shortContent = content ? (content.length > 50 ? content.substring(0, 50) + '...' : content) : '';
+    return `UBND Xã Châu Thành thông báo kết quả xử lý phản ánh của ông/bà ${name || 'người dân'}:
+- Vấn đề: "${shortContent}"
+- Kết quả xử lý: ${responseNote || 'Đã được giải quyết.'}
+Trân trọng cảm ơn!`;
+  };
+
+  const handleSendSMS = (phone, message) => {
+    const clean = getCleanPhone(phone);
+    if (!clean) {
+      alert('Không tìm thấy số điện thoại của người dân!');
+      return;
+    }
+    const encoded = encodeURIComponent(message);
+    window.open(`sms:${clean}?body=${encoded}`, '_blank');
+  };
+
+  const handleSendZalo = (phone, message) => {
+    const clean = getCleanPhone(phone);
+    if (!clean) {
+      alert('Không tìm thấy số điện thoại của người dân!');
+      return;
+    }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(message);
+    }
+    window.open(`https://zalo.me/${clean}`, '_blank');
+  };
+
+  const handleCopyMessage = (message) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(message);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
+
   const submitHandle = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -158,9 +204,32 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       
       if (!response.ok) throw new Error(data.error || 'Có lỗi xảy ra');
       
-      setStatus({ type: 'success', message: 'Xử lý ý kiến thành công!' });
-      
-      setTimeout(() => setViewMode('list'), 1500);
+      const msg = generateResultMessage(selectedFeedback.name, selectedFeedback.content, handleData.responseNote);
+
+      // Tự động mở Zalo / SMS nếu người dùng chọn
+      if (autoSendMethod === 'zalo' && selectedFeedback.phone) {
+        handleSendZalo(selectedFeedback.phone, msg);
+      } else if (autoSendMethod === 'sms' && selectedFeedback.phone) {
+        handleSendSMS(selectedFeedback.phone, msg);
+      }
+
+      setHandledSuccessData({
+        phone: selectedFeedback.phone,
+        name: selectedFeedback.name,
+        message: msg,
+        note: handleData.responseNote
+      });
+
+      // Cập nhật selectedFeedback
+      setSelectedFeedback(prev => ({
+        ...prev,
+        status: 'handled',
+        response_note: handleData.responseNote,
+        response_file_url: handleData.responseFileUrl,
+        handled_at: new Date().toISOString()
+      }));
+
+      setStatus({ type: 'success', message: 'Đã hoàn tất xử lý ý kiến thành công!' });
     } catch (error) {
       setStatus({ type: 'error', message: error.message || 'Có lỗi xảy ra khi xử lý.' });
     } finally {
@@ -174,6 +243,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       responseNote: fb.response_note || '',
       responseFileUrl: fb.response_file_url || ''
     });
+    setHandledSuccessData(null);
     setStatus({ type: '', message: '' });
     setViewMode('handle');
   };
@@ -337,6 +407,68 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
         </div>
       )}
 
+      {handledSuccessData && (
+        <div className={styles.resultSuccessBox}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
+            <CheckCircle size={20} /> Đã lưu kết quả xử lý thành công!
+          </div>
+          <div style={{ fontSize: '14px', color: '#334155', marginBottom: '8px' }}>
+            Nội dung thông báo gửi về số điện thoại người dân <strong>({handledSuccessData.phone || 'Chưa có SĐT'})</strong>:
+          </div>
+          <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: '12px 14px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#1e293b', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
+            {handledSuccessData.message}
+          </div>
+          <div className={styles.btnGroup}>
+            {handledSuccessData.phone && (
+              <>
+                <button 
+                  type="button" 
+                  className={styles.zaloBtn}
+                  onClick={() => handleSendZalo(handledSuccessData.phone, handledSuccessData.message)}
+                >
+                  <MessageCircle size={16} /> Gửi qua Zalo ({handledSuccessData.phone})
+                </button>
+
+                <button 
+                  type="button" 
+                  className={styles.smsBtn}
+                  onClick={() => handleSendSMS(handledSuccessData.phone, handledSuccessData.message)}
+                >
+                  <Send size={16} /> Gửi tin nhắn SMS ({handledSuccessData.phone})
+                </button>
+              </>
+            )}
+
+            <button 
+              type="button" 
+              className={styles.copyBtn}
+              onClick={() => handleCopyMessage(handledSuccessData.message)}
+            >
+              {copySuccess ? <Check size={16} color="green" /> : <Copy size={16} />}
+              {copySuccess ? 'Đã sao chép!' : 'Sao chép tin nhắn'}
+            </button>
+
+            {handledSuccessData.phone && (
+              <a 
+                href={`tel:${getCleanPhone(handledSuccessData.phone)}`}
+                className={styles.callBtn}
+              >
+                <Phone size={16} /> Gọi điện
+              </a>
+            )}
+          </div>
+          <div style={{ marginTop: '16px' }}>
+            <button 
+              type="button" 
+              className={styles.primaryBtn}
+              onClick={() => setViewMode('list')}
+            >
+              ← Hoàn tất & Quay lại danh sách
+            </button>
+          </div>
+        </div>
+      )}
+
       {selectedFeedback?.status === 'handled' ? (
         <div className={styles.form}>
            <div className={styles.formGroup}>
@@ -351,6 +483,47 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
               ) : (
                 <a href={selectedFeedback.response_file_url} target="_blank" rel="noreferrer" style={{color:'#1e3c72', textDecoration:'underline'}}>Xem công văn</a>
               )}
+            </div>
+          )}
+
+          {selectedFeedback.phone && (
+            <div className={styles.sendCard} style={{ background: '#f8fafc', borderColor: '#e2e8f0', marginTop: '10px' }}>
+              <div className={styles.sendCardHeader} style={{ color: '#1e3a8a' }}>
+                <Send size={18} /> Gửi lại kết quả xử lý về SĐT người dân ({selectedFeedback.phone}):
+              </div>
+              <div className={styles.btnGroup}>
+                <button 
+                  type="button" 
+                  className={styles.zaloBtn}
+                  onClick={() => handleSendZalo(selectedFeedback.phone, generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
+                >
+                  <MessageCircle size={16} /> Gửi qua Zalo
+                </button>
+
+                <button 
+                  type="button" 
+                  className={styles.smsBtn}
+                  onClick={() => handleSendSMS(selectedFeedback.phone, generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
+                >
+                  <Send size={16} /> Gửi qua SMS
+                </button>
+
+                <button 
+                  type="button" 
+                  className={styles.copyBtn}
+                  onClick={() => handleCopyMessage(generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
+                >
+                  {copySuccess ? <Check size={16} color="green" /> : <Copy size={16} />}
+                  {copySuccess ? 'Đã sao chép!' : 'Sao chép tin nhắn'}
+                </button>
+
+                <a 
+                  href={`tel:${getCleanPhone(selectedFeedback.phone)}`}
+                  className={styles.callBtn}
+                >
+                  <Phone size={16} /> Gọi điện
+                </a>
+              </div>
             </div>
           )}
         </div>
@@ -379,8 +552,56 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
             {handleData.responseFileUrl && <small style={{color:'green'}}>Đã chọn file đính kèm</small>}
           </div>
 
+          {/* Khung gửi kết quả về SĐT người dân */}
+          <div className={styles.sendCard}>
+            <div className={styles.sendCardHeader}>
+              <Send size={18} /> Gửi kết quả về SĐT người dân: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.phone || 'Chưa có SĐT'}</strong>
+            </div>
+            <p style={{ margin: '0 0 10px', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+              Khi bấm Hoàn tất, hệ thống sẽ tự động chuẩn bị tin nhắn thông báo gửi về số điện thoại người dân.
+            </p>
+            {selectedFeedback?.phone ? (
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '14px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                  <input 
+                    type="radio" 
+                    name="autoSendMethod" 
+                    value="zalo" 
+                    checked={autoSendMethod === 'zalo'}
+                    onChange={() => setAutoSendMethod('zalo')}
+                  />
+                  <span>Tự động mở gửi qua <strong>Zalo</strong></span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                  <input 
+                    type="radio" 
+                    name="autoSendMethod" 
+                    value="sms" 
+                    checked={autoSendMethod === 'sms'}
+                    onChange={() => setAutoSendMethod('sms')}
+                  />
+                  <span>Tự động mở gửi qua <strong>SMS</strong></span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                  <input 
+                    type="radio" 
+                    name="autoSendMethod" 
+                    value="manual" 
+                    checked={autoSendMethod === 'manual'}
+                    onChange={() => setAutoSendMethod('manual')}
+                  />
+                  <span>Chọn nút gửi thủ công</span>
+                </label>
+              </div>
+            ) : (
+              <div style={{ fontSize: '13px', color: '#b91c1c' }}>
+                Người dân không để lại số điện thoại khi gửi phản ánh này.
+              </div>
+            )}
+          </div>
+
           <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
-            {isSubmitting ? 'Đang xử lý...' : 'Hoàn tất Xử Lý'}
+            {isSubmitting ? 'Đang xử lý...' : 'Hoàn tất Xử Lý & Gửi Kết Quả'}
           </button>
         </form>
       )}
