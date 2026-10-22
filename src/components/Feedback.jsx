@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, Clock, Mail, Phone, Copy, Check } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, MessageCircle, Phone, Copy, Check } from 'lucide-react';
 import styles from './Feedback.module.css';
 
 const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
@@ -29,8 +29,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const [isLoadingFeedbacks, setIsLoadingFeedbacks] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [handledSuccessData, setHandledSuccessData] = useState(null);
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const [emailSuccessMessage, setEmailSuccessMessage] = useState('');
+  const [zaloNoticeMessage, setZaloNoticeMessage] = useState('');
 
   useEffect(() => {
     if (viewMode === 'list') {
@@ -119,10 +118,6 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       setStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại liên hệ của người dân.' });
       return;
     }
-    if (!formData.email || !formData.email.trim()) {
-      setStatus({ type: 'error', message: 'Vui lòng nhập địa chỉ Email / Gmail của người dân.' });
-      return;
-    }
     setIsSubmitting(true);
     setStatus({ type: '', message: '' });
 
@@ -137,7 +132,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       
       if (!response.ok) throw new Error(data.error || 'Có lỗi xảy ra');
       
-      setStatus({ type: 'success', message: 'Ghi nhận ý kiến thành công! Kết quả sẽ được gửi tự động về Email người dân.' });
+      setStatus({ type: 'success', message: 'Ghi nhận ý kiến thành công!' });
       
       setFormData(prev => ({
         ...prev,
@@ -169,39 +164,18 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
 Trân trọng cảm ơn!`;
   };
 
-  const handleSendEmail = async (email, name, content, responseNote, responseFileUrl) => {
-    if (!email) {
-      alert('Không tìm thấy địa chỉ Email của người dân!');
+  const handleSendZalo = (phone, message) => {
+    const clean = getCleanPhone(phone);
+    if (!clean) {
+      alert('Không tìm thấy số điện thoại của người dân!');
       return;
     }
-    
-    setIsSendingEmail(true);
-    setEmailSuccessMessage('');
-    try {
-      await fetch('https://phanmem-xaap.onrender.com/api/feedbacks/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          name,
-          content,
-          responseNote,
-          responseFileUrl,
-          feedbackId: selectedFeedback?.id
-        })
-      });
-
-      setStatus({ type: 'success', message: `Đã gửi kết quả xử lý về địa chỉ Email ${email} thành công!` });
-      setEmailSuccessMessage(`Đã gửi kết quả về Email ${email} thành công!`);
-      setTimeout(() => setEmailSuccessMessage(''), 5000);
-    } catch (err) {
-      console.error('Lỗi khi gửi Email:', err);
-      setStatus({ type: 'success', message: `Đã gửi kết quả xử lý về địa chỉ Email ${email} thành công!` });
-      setEmailSuccessMessage(`Đã gửi kết quả về Email ${email} thành công!`);
-      setTimeout(() => setEmailSuccessMessage(''), 5000);
-    } finally {
-      setIsSendingEmail(false);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(message);
     }
+    setZaloNoticeMessage('Đã sao chép nội dung tin nhắn! Bạn chỉ cần nhấn Dán (Ctrl + V) và Gửi trong Zalo.');
+    setTimeout(() => setZaloNoticeMessage(''), 8000);
+    window.open(`https://zalo.me/${clean}`, '_blank');
   };
 
   const handleCopyMessage = (message) => {
@@ -250,9 +224,7 @@ Trân trọng cảm ơn!`;
 
       setStatus({ 
         type: 'success', 
-        message: selectedFeedback.email 
-          ? `Đã hoàn tất xử lý ý kiến và gửi kết quả về Email ${selectedFeedback.email} thành công!` 
-          : 'Đã hoàn tất xử lý ý kiến thành công!' 
+        message: 'Đã hoàn tất xử lý ý kiến thành công! Bạn có thể bấm "Gửi qua Zalo" để gửi thông báo cho người dân.' 
       });
     } catch (error) {
       setStatus({ type: 'error', message: error.message || 'Có lỗi xảy ra khi xử lý.' });
@@ -365,7 +337,7 @@ Trân trọng cảm ơn!`;
           <input type="text" name="name" value={formData.name} onChange={handleCreateChange} className={styles.input} required />
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Số điện thoại liên hệ <span style={{ color: 'red' }}>*</span></label>
+          <label className={styles.label}>Số điện thoại liên hệ (có Zalo) <span style={{ color: 'red' }}>*</span></label>
           <input 
             type="tel" 
             name="phone" 
@@ -379,15 +351,14 @@ Trân trọng cảm ơn!`;
           />
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Địa chỉ Email / Gmail nhận kết quả <span style={{ color: 'red' }}>*</span></label>
+          <label className={styles.label}>Địa chỉ Email / Gmail (Tùy chọn)</label>
           <input 
             type="email" 
             name="email" 
             value={formData.email} 
             onChange={handleCreateChange} 
             className={styles.input} 
-            required 
-            placeholder="Ví dụ: nguyenvana@gmail.com"
+            placeholder="Ví dụ: nguyenvana@gmail.com (không bắt buộc)"
           />
         </div>
         <div className={styles.formGroup}>
@@ -460,20 +431,19 @@ Trân trọng cảm ơn!`;
             <CheckCircle size={20} /> Đã lưu kết quả xử lý thành công!
           </div>
           <div style={{ fontSize: '14px', color: '#334155', marginBottom: '8px' }}>
-            Nội dung thông báo kết quả gửi về Email người dân <strong>({handledSuccessData.email || 'Chưa có Email'})</strong>:
+            Nội dung thông báo kết quả gửi về Zalo người dân <strong>({handledSuccessData.phone || 'Chưa có SĐT'})</strong>:
           </div>
           <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: '12px 14px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#1e293b', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
             {handledSuccessData.message}
           </div>
           <div className={styles.btnGroup}>
-            {handledSuccessData.email && (
+            {handledSuccessData.phone && (
               <button 
                 type="button" 
-                className={styles.emailBtn}
-                onClick={() => handleSendEmail(handledSuccessData.email, handledSuccessData.name, selectedFeedback?.content, handledSuccessData.note, handledSuccessData.responseFileUrl)}
-                disabled={isSendingEmail}
+                className={styles.zaloBtn}
+                onClick={() => handleSendZalo(handledSuccessData.phone, handledSuccessData.message)}
               >
-                <Mail size={16} /> {isSendingEmail ? 'Đang gửi Email...' : `Gửi lại qua Email (${handledSuccessData.email})`}
+                <MessageCircle size={16} /> Gửi qua Zalo ({handledSuccessData.phone})
               </button>
             )}
 
@@ -495,9 +465,9 @@ Trân trọng cảm ơn!`;
               </a>
             )}
           </div>
-          {emailSuccessMessage && (
-            <div style={{ marginTop: '10px', color: '#16a34a', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CheckCircle size={16} /> {emailSuccessMessage}
+          {zaloNoticeMessage && (
+            <div style={{ marginTop: '10px', color: '#0068ff', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#eff6ff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+              <CheckCircle size={16} /> {zaloNoticeMessage}
             </div>
           )}
           <div style={{ marginTop: '16px' }}>
@@ -529,19 +499,18 @@ Trân trọng cảm ơn!`;
             </div>
           )}
 
-          {selectedFeedback.email && (
+          {selectedFeedback.phone && (
             <div className={styles.sendCard} style={{ background: '#f8fafc', borderColor: '#e2e8f0', marginTop: '10px' }}>
-              <div className={styles.sendCardHeader} style={{ color: '#1e3a8a' }}>
-                <Mail size={18} /> Gửi lại kết quả xử lý về Email người dân ({selectedFeedback.email}):
+              <div className={styles.sendCardHeader} style={{ color: '#0068ff' }}>
+                <MessageCircle size={18} /> Gửi kết quả xử lý qua Zalo người dân ({selectedFeedback.phone}):
               </div>
               <div className={styles.btnGroup}>
                 <button 
                   type="button" 
-                  className={styles.emailBtn}
-                  onClick={() => handleSendEmail(selectedFeedback.email, selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note, selectedFeedback.response_file_url)}
-                  disabled={isSendingEmail}
+                  className={styles.zaloBtn}
+                  onClick={() => handleSendZalo(selectedFeedback.phone, generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
                 >
-                  <Mail size={16} /> {isSendingEmail ? 'Đang gửi Email...' : 'Gửi lại qua Email'}
+                  <MessageCircle size={16} /> Gửi qua Zalo ({selectedFeedback.phone})
                 </button>
 
                 <button 
@@ -562,9 +531,9 @@ Trân trọng cảm ơn!`;
                   </a>
                 )}
               </div>
-              {emailSuccessMessage && (
-                <div style={{ marginTop: '10px', color: '#16a34a', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <CheckCircle size={16} /> {emailSuccessMessage}
+              {zaloNoticeMessage && (
+                <div style={{ marginTop: '10px', color: '#0068ff', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#eff6ff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
+                  <CheckCircle size={16} /> {zaloNoticeMessage}
                 </div>
               )}
             </div>
@@ -595,13 +564,13 @@ Trân trọng cảm ơn!`;
             {handleData.responseFileUrl && <small style={{color:'green'}}>Đã chọn file đính kèm</small>}
           </div>
 
-          {/* Khung thông báo gửi kết quả qua Email */}
+          {/* Khung thông báo gửi kết quả qua Zalo */}
           <div className={styles.sendCard}>
-            <div className={styles.sendCardHeader}>
-              <Mail size={18} /> Kết quả sẽ gửi tự động về Email: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.email || 'Chưa có Email'}</strong>
+            <div className={styles.sendCardHeader} style={{ color: '#0068ff' }}>
+              <MessageCircle size={18} /> Kết quả sẽ gửi qua Zalo người dân: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.phone || 'Chưa có SĐT'}</strong>
             </div>
             <p style={{ margin: '0', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-              Khi bấm <strong>Hoàn tất Xử Lý Ý Kiến</strong>, hệ thống sẽ lưu kết quả và tự động gửi thư điện tử thông báo giải quyết trực tiếp đến địa chỉ Email của người dân.
+              Sau khi bấm <strong>Hoàn tất Xử Lý Ý Kiến</strong>, bạn có thể bấm nút <strong>Gửi qua Zalo</strong> để gửi tin nhắn thông báo giải quyết trực tiếp đến người dân (nội dung kết quả đã tự động sao chép, bạn chỉ việc Dán / Ctrl+V và Gửi).
             </p>
           </div>
 

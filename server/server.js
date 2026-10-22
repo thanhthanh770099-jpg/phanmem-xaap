@@ -429,14 +429,14 @@ async function sendFeedbackEmail(email, name, content, responseNote, responseFil
 // API 4: Lưu ý kiến người dân
 app.post('/api/feedbacks', async (req, res) => {
   const { name, phone, email, hamletId, content, imageUrl } = req.body;
-  if (!name || !phone || !email || !hamletId || !content) {
-    return res.status(400).json({ error: 'Vui lòng điền đầy đủ các thông tin bắt buộc (họ tên, số điện thoại, email, ấp, nội dung)' });
+  if (!name || !phone || !hamletId || !content) {
+    return res.status(400).json({ error: 'Vui lòng điền đầy đủ các thông tin bắt buộc (họ tên, số điện thoại, ấp, nội dung)' });
   }
 
   try {
     await pool.query(
       'INSERT INTO citizen_feedbacks (name, phone, email, hamlet_id, content, image_url) VALUES ($1, $2, $3, $4, $5, $6)',
-      [name, phone, email, hamletId, content, imageUrl || null]
+      [name, phone, email || null, hamletId, content, imageUrl || null]
     );
     res.json({ message: 'Gửi ý kiến thành công' });
   } catch (error) {
