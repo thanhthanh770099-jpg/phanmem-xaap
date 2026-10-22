@@ -363,8 +363,8 @@ app.put('/api/documents/:id/complete', async (req, res) => {
 // API 4: Lưu ý kiến người dân
 app.post('/api/feedbacks', async (req, res) => {
   const { name, phone, hamletId, content, imageUrl } = req.body;
-  if (!name || !hamletId || !content) {
-    return res.status(400).json({ error: 'Vui lòng điền đầy đủ các thông tin bắt buộc' });
+  if (!name || !phone || !hamletId || !content) {
+    return res.status(400).json({ error: 'Vui lòng điền đầy đủ các thông tin bắt buộc (họ tên, số điện thoại, ấp, nội dung)' });
   }
 
   try {

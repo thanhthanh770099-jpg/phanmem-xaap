@@ -56,6 +56,10 @@ const PublicFeedback = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.phone || !formData.phone.trim()) {
+      setStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại liên hệ để nhận phản hồi.' });
+      return;
+    }
     setIsSubmitting(true);
     setStatus({ type: '', message: '' });
 
@@ -110,8 +114,18 @@ const PublicFeedback = () => {
             <input type="text" name="name" value={formData.name} onChange={handleChange} className={styles.input} required />
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Số điện thoại liên hệ</label>
-            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={styles.input} />
+            <label className={styles.label}>Số điện thoại liên hệ <span style={{color: 'red'}}>*</span></label>
+            <input 
+              type="tel" 
+              name="phone" 
+              value={formData.phone} 
+              onChange={handleChange} 
+              className={styles.input} 
+              required 
+              placeholder="Ví dụ: 0912345678"
+              pattern="[0-9]{10,11}"
+              title="Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)"
+            />
           </div>
           <div className={styles.formGroup}>
             <label className={styles.label}>Gửi đến Ấp <span style={{color: 'red'}}>*</span></label>
