@@ -1,0 +1,562 @@
+[
+  {
+    "id": 1,
+    "ap": "Ấp Giồng Lức",
+    "hoTen": "Thạch Sang",
+    "sdt": "0353.719.865",
+    "sdtRaw": "0353719865",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 2,
+    "ap": "Ấp Giồng Lức",
+    "hoTen": "Thạch Ngọc Kiều",
+    "sdt": "0362.806.147",
+    "sdtRaw": "0362806147",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 3,
+    "ap": "Ấp Giồng Lức",
+    "hoTen": "Nguyễn Văn Quí",
+    "sdt": "0372.959.002",
+    "sdtRaw": "0372959002",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 4,
+    "ap": "Ấp Bàu Sơn",
+    "hoTen": "Thạch Đenr",
+    "sdt": "0366.172.743",
+    "sdtRaw": "0366172743",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 5,
+    "ap": "Ấp Bàu Sơn",
+    "hoTen": "Thạch Đa Ni",
+    "sdt": "0989.745.315",
+    "sdtRaw": "0989745315",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 6,
+    "ap": "Ấp Thanh Trì A",
+    "hoTen": "Huỳnh Ngọc",
+    "sdt": "0779.841.618",
+    "sdtRaw": "0779841618",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 7,
+    "ap": "Ấp Thanh Trì B",
+    "hoTen": "Sơn Sô Phol",
+    "sdt": "0358.325.766",
+    "sdtRaw": "0358325766",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 8,
+    "ap": "Ấp Thanh Trì B",
+    "hoTen": "Kiên Dũng",
+    "sdt": "0902.448.465",
+    "sdtRaw": "0902448465",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 9,
+    "ap": "Ấp Thanh Trì B",
+    "hoTen": "Thạch Ngọc Sĩ",
+    "sdt": "0369.549.133",
+    "sdtRaw": "0369549133",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 10,
+    "ap": "Ấp Hương Phụ A",
+    "hoTen": "Thạch Sóc Kha",
+    "sdt": "0328.499.668",
+    "sdtRaw": "0328499668",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 11,
+    "ap": "Ấp Hương Phụ A",
+    "hoTen": "Lâm Ngọc Sươnl",
+    "sdt": "0387.563.711",
+    "sdtRaw": "0387563711",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 12,
+    "ap": "Ấp Hương Phụ A",
+    "hoTen": "Dương Công Thưởng",
+    "sdt": "0365.300.573",
+    "sdtRaw": "0365300573",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 13,
+    "ap": "Ấp Hương Phụ B",
+    "hoTen": "Thạch Sô Phai",
+    "sdt": "0344.880.090",
+    "sdtRaw": "0344880090",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 14,
+    "ap": "Ấp Hương Phụ B",
+    "hoTen": "Thạch Hùng Cường",
+    "sdt": "0336.443.390",
+    "sdtRaw": "0336443390",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 15,
+    "ap": "Ấp Hương Phụ C",
+    "hoTen": "Huỳnh Minh Ứng",
+    "sdt": "0964.102.469",
+    "sdtRaw": "0964102469",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 16,
+    "ap": "Ấp Hương Phụ C",
+    "hoTen": "Sơn Ngọc Chiến",
+    "sdt": "0383.862.460",
+    "sdtRaw": "0383862460",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 17,
+    "ap": "Ấp Hương Phụ C",
+    "hoTen": "Hồ Văn Cu",
+    "sdt": "0339.504.357",
+    "sdtRaw": "0339504357",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 18,
+    "ap": "Ấp Thanh Nguyên A",
+    "hoTen": "Tăng Hữu Tuấn",
+    "sdt": "0961.775.721",
+    "sdtRaw": "0961775721",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 19,
+    "ap": "Ấp Thanh Nguyên A",
+    "hoTen": "Kim Hoàng Sơn",
+    "sdt": "0866.598.553",
+    "sdtRaw": "0866598553",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 20,
+    "ap": "Ấp Thanh Nguyên A",
+    "hoTen": "Nguyễn Trí Nguyên",
+    "sdt": "0794.380.758",
+    "sdtRaw": "0794380758",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 21,
+    "ap": "Ấp Thanh Nguyên B",
+    "hoTen": "Trang Văn Trọng",
+    "sdt": "0353.540.870",
+    "sdtRaw": "0353540870",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 22,
+    "ap": "Ấp Thanh Nguyên B",
+    "hoTen": "Kim Em",
+    "sdt": "0389.046.214",
+    "sdtRaw": "0389046214",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 23,
+    "ap": "Ấp Phú Nhiêu",
+    "hoTen": "Võ Minh Trúc",
+    "sdt": "0973.766.214",
+    "sdtRaw": "0973766214",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 24,
+    "ap": "Ấp Cây Dương",
+    "hoTen": "Dương Văn Chất",
+    "sdt": "0369.343.707",
+    "sdtRaw": "0369343707",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 25,
+    "ap": "Ấp Cây Dương",
+    "hoTen": "Lê Văn Mỹ",
+    "sdt": "0945.725.559",
+    "sdtRaw": "0945725559",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 26,
+    "ap": "Ấp Cây Dương",
+    "hoTen": "Nguyễn Văn Toàn",
+    "sdt": "0373.167.995",
+    "sdtRaw": "0373167995",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 27,
+    "ap": "Ấp Phú Thọ",
+    "hoTen": "Trần Minh Trung",
+    "sdt": "0911.441.739",
+    "sdtRaw": "0911441739",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 28,
+    "ap": "Ấp Phú Thọ",
+    "hoTen": "Võ Thanh Sung",
+    "sdt": "0386.006.892",
+    "sdtRaw": "0386006892",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 29,
+    "ap": "Ấp Đầu Giồng",
+    "hoTen": "Huỳnh Minh Hà",
+    "sdt": "0901.063.132",
+    "sdtRaw": "0901063132",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 30,
+    "ap": "Ấp Đầu Giồng",
+    "hoTen": "Đoàn Thị Ngọc Thoại",
+    "sdt": "0378.746.727",
+    "sdtRaw": "0378746727",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 31,
+    "ap": "Ấp Đầu Giồng",
+    "hoTen": "Trần Thanh Bình",
+    "sdt": "0917.917.839",
+    "sdtRaw": "0917917839",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 32,
+    "ap": "Ấp Đầu Giồng",
+    "hoTen": "Lê Văn Nhàn",
+    "sdt": "0359.795.064",
+    "sdtRaw": "0359795064",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 33,
+    "ap": "Ấp Đầu Giồng",
+    "hoTen": "Lê Văn Hùng",
+    "sdt": "0357.626.675",
+    "sdtRaw": "0357626675",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 34,
+    "ap": "Ấp Đầu Giồng",
+    "hoTen": "Thạch Dân",
+    "sdt": "0392.234.573",
+    "sdtRaw": "0392234573",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 35,
+    "ap": "Ấp Phú Mỹ",
+    "hoTen": "Kim Ngân",
+    "sdt": "0355.863.804",
+    "sdtRaw": "0355863804",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 36,
+    "ap": "Ấp Phú Mỹ",
+    "hoTen": "Sơn Danh",
+    "sdt": "0383.272.161",
+    "sdtRaw": "0383272161",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 37,
+    "ap": "Ấp Phú Mỹ",
+    "hoTen": "Thạch Phộ",
+    "sdt": "0964.799.635",
+    "sdtRaw": "0964799635",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 38,
+    "ap": "Ấp Phú Mỹ",
+    "hoTen": "Thạch Cương",
+    "sdt": "0333.595.243",
+    "sdtRaw": "0333595243",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 39,
+    "ap": "Ấp Phú Mỹ",
+    "hoTen": "Huỳnh Minh Tuyến",
+    "sdt": "0333.074.010",
+    "sdtRaw": "0333074010",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 40,
+    "ap": "Ấp Phú Mỹ",
+    "hoTen": "Thạch Thanh",
+    "sdt": "0342.421.384",
+    "sdtRaw": "0342421384",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 41,
+    "ap": "Ấp Thanh Mỹ",
+    "hoTen": "Nguyễn Trường Thọ",
+    "sdt": "0913.593.034",
+    "sdtRaw": "0913593034",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 42,
+    "ap": "Ấp Thanh Mỹ",
+    "hoTen": "Nguyễn Minh Cảnh",
+    "sdt": "0367.981.370",
+    "sdtRaw": "0367981370",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 43,
+    "ap": "Ấp Thanh Mỹ",
+    "hoTen": "Nguyễn Thanh Toàn",
+    "sdt": "0356.584.513",
+    "sdtRaw": "0356584513",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 44,
+    "ap": "Ấp Thanh Mỹ",
+    "hoTen": "Trương Văn Trúc",
+    "sdt": "0377.536.573",
+    "sdtRaw": "0377536573",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 45,
+    "ap": "Ấp Thanh Mỹ",
+    "hoTen": "Nguyễn Văn Em",
+    "sdt": "0372.211.577",
+    "sdtRaw": "0372211577",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 46,
+    "ap": "Ấp Thanh Mỹ",
+    "hoTen": "Trần Văn Ai",
+    "sdt": "0369.343.707",
+    "sdtRaw": "0369343707",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 47,
+    "ap": "Ấp Nhà Dựa",
+    "hoTen": "Thi Văn Kiệt",
+    "sdt": "0372.688.806",
+    "sdtRaw": "0372688806",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 48,
+    "ap": "Ấp Nhà Dựa",
+    "hoTen": "Từ Hùng Cường",
+    "sdt": "0973.717.141",
+    "sdtRaw": "0973717141",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 49,
+    "ap": "Ấp Nhà Dựa",
+    "hoTen": "Nguyễn Trung Nguyên",
+    "sdt": "0963.769.626",
+    "sdtRaw": "0963769626",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 50,
+    "ap": "Ấp Nhà Dựa",
+    "hoTen": "Trần Văn Bình",
+    "sdt": "0768.875.685",
+    "sdtRaw": "0768875685",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 51,
+    "ap": "Ấp Ô Tre",
+    "hoTen": "Nguyễn Văn Hiệp",
+    "sdt": "0344.812.607",
+    "sdtRaw": "0344812607",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 52,
+    "ap": "Ấp Ô Tre",
+    "hoTen": "Nguyễn Thế Quang",
+    "sdt": "0389.777.250",
+    "sdtRaw": "0389777250",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 53,
+    "ap": "Ấp Ô Tre",
+    "hoTen": "Lâm Thanh Nhật",
+    "sdt": "0349.860.405",
+    "sdtRaw": "0349860405",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 54,
+    "ap": "Ấp Ô Tre",
+    "hoTen": "Hồng Văn Hạo",
+    "sdt": "0328.968.157",
+    "sdtRaw": "0328968157",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 55,
+    "ap": "Ấp Ô Tre",
+    "hoTen": "Nguyễn Văn Minh",
+    "sdt": "0347.813.849",
+    "sdtRaw": "0347813849",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 56,
+    "ap": "Ấp Ba Tiêu",
+    "hoTen": "Thạch Út Vàng",
+    "sdt": "0348.401.309",
+    "sdtRaw": "0348401309",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 57,
+    "ap": "Ấp Ba Tiêu",
+    "hoTen": "Thạch Chăm Ninh",
+    "sdt": "0939.140.797",
+    "sdtRaw": "0939140797",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 58,
+    "ap": "Ấp Ba Tiêu",
+    "hoTen": "Thạch So Thia",
+    "sdt": "0976.165.992",
+    "sdtRaw": "0976165992",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 59,
+    "ap": "Ấp Ba Tiêu",
+    "hoTen": "Thạch Chanh Đa",
+    "sdt": "0349.013.094",
+    "sdtRaw": "0349013094",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 60,
+    "ap": "Ấp Ba Tiêu",
+    "hoTen": "Mã Đình Phương",
+    "sdt": "0367.012.086",
+    "sdtRaw": "0367012086",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 61,
+    "ap": "Ấp Đa Lộc",
+    "hoTen": "Thạch Thị Quít Pha",
+    "sdt": "0335.269.640",
+    "sdtRaw": "0335269640",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 62,
+    "ap": "Ấp Đa Lộc",
+    "hoTen": "Nguyễn Văn Khanh",
+    "sdt": "0395.516.764",
+    "sdtRaw": "0395516764",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 63,
+    "ap": "Ấp Đa Lộc",
+    "hoTen": "Trần Văn Vũ",
+    "sdt": "0869.172.549",
+    "sdtRaw": "0869172549",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 64,
+    "ap": "Ấp Đa Lộc",
+    "hoTen": "Đặng Hải Triều",
+    "sdt": "0938.216.790",
+    "sdtRaw": "0938216790",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 65,
+    "ap": "Ấp Đa Lộc",
+    "hoTen": "Đoàn Công Bình",
+    "sdt": "0387.707.321",
+    "sdtRaw": "0387707321",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 66,
+    "ap": "Ấp Tầm Phương",
+    "hoTen": "Thạch Chương",
+    "sdt": "0353.622.041",
+    "sdtRaw": "0353622041",
+    "chucDanh": "Tổ Trưởng"
+  },
+  {
+    "id": 67,
+    "ap": "Ấp Tầm Phương",
+    "hoTen": "Huỳnh Văn Bé",
+    "sdt": "0377.003.726",
+    "sdtRaw": "0377003726",
+    "chucDanh": "Tổ phó"
+  },
+  {
+    "id": 68,
+    "ap": "Ấp Tầm Phương",
+    "hoTen": "Thạch Anh Tuấn",
+    "sdt": "0976.087.767",
+    "sdtRaw": "0976087767",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 69,
+    "ap": "Ấp Tầm Phương",
+    "hoTen": "Kim Long",
+    "sdt": "0369.384.089",
+    "sdtRaw": "0369384089",
+    "chucDanh": "Tổ viên"
+  },
+  {
+    "id": 70,
+    "ap": "Ấp Tầm Phương",
+    "hoTen": "Sơn Soanl",
+    "sdt": "0373.165.845",
+    "sdtRaw": "0373165845",
+    "chucDanh": "Tổ viên"
+  }
+]

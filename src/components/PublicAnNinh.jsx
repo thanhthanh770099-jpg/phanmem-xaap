@@ -1,29 +1,154 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import anNinhData from '../data/an-ninh.json';
+import styles from './PublicAnNinh.module.css';
+import { Shield, Phone, Search, ArrowLeft, PhoneCall, Filter } from 'lucide-react';
 
 const PublicAnNinh = () => {
-  return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif', height: '100vh', overflowY: 'auto', boxSizing: 'border-box' }}>
-      <h1 style={{ color: '#ef4444', textAlign: 'center', marginBottom: '30px' }}>Công An - An Ninh Trật Tự</h1>
-      
-      <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fca5a5', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-        <h2 style={{ color: '#b91c1c', marginTop: 0 }}>Trực ban Công an Xã</h2>
-        <p style={{ fontSize: '18px' }}><strong>Điện thoại:</strong> <a href="tel:0123456789" style={{ color: '#dc2626', textDecoration: 'none' }}>0123.456.789</a> (Cập nhật số điện thoại thực tế tại đây)</p>
-        <p>Phục vụ 24/7 tiếp nhận các tin báo về tội phạm, vi phạm pháp luật và các vấn đề an ninh trật tự trên địa bàn.</p>
-      </div>
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedAp, setSelectedAp] = useState('ALL');
 
-      <div style={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', padding: '20px', borderRadius: '8px' }}>
-        <h2 style={{ color: '#374151', marginTop: 0 }}>Thông tin liên hệ các ấp</h2>
-        <ul style={{ lineHeight: '1.8', color: '#4b5563' }}>
-          <li><strong>Công an viên Ấp 1:</strong> 0901.xxx.xxx</li>
-          <li><strong>Công an viên Ấp 2:</strong> 0902.xxx.xxx</li>
-          <li><strong>Công an viên Ấp 3:</strong> 0903.xxx.xxx</li>
-          {/* Add more as needed */}
-        </ul>
-        <p style={{ fontSize: '14px', fontStyle: 'italic', color: '#9ca3af' }}>Danh sách đang được cập nhật...</p>
-      </div>
-      
-      <div style={{ textAlign: 'center', marginTop: '30px' }}>
-        <a href="/cong-dan" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 'bold' }}>&larr; Quay lại Mô hình Ấp Số</a>
+  // Danh sách các ấp duy nhất
+  const danhSachAp = useMemo(() => {
+    const list = Array.from(new Set(anNinhData.map(item => item.ap)));
+    return list;
+  }, []);
+
+  // Lọc dữ liệu
+  const filteredData = useMemo(() => {
+    return anNinhData.filter(item => {
+      const matchAp = selectedAp === 'ALL' || item.ap === selectedAp;
+      const term = searchTerm.toLowerCase().trim();
+      const matchSearch = !term || 
+        item.hoTen.toLowerCase().includes(term) ||
+        item.ap.toLowerCase().includes(term) ||
+        item.sdt.includes(term) ||
+        item.sdtRaw.includes(term) ||
+        item.chucDanh.toLowerCase().includes(term);
+      return matchAp && matchSearch;
+    });
+  }, [searchTerm, selectedAp]);
+
+  const getBadgeClass = (chucDanh) => {
+    if (chucDanh.includes('Trưởng')) return `${styles.badge} ${styles.badgeToTruong}`;
+    if (chucDanh.includes('phó')) return `${styles.badge} ${styles.badgeToPho}`;
+    return `${styles.badge} ${styles.badgeToVien}`;
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.contentWrapper}>
+        <a href="/cong-dan" className={styles.backBtn}>
+          <ArrowLeft size={16} /> Quay lại Mô hình Ấp Số
+        </a>
+
+        {/* Header Banner */}
+        <div className={styles.headerCard}>
+          <div className={styles.headerIcon}>
+            <Shield size={28} />
+          </div>
+          <h1 className={styles.title}>Lực Lượng Bảo Vệ An Ninh, Trật Tự Ở Cơ Sở</h1>
+          <p className={styles.subtitle}>
+            Công an Xã Châu Thành &bull; Danh sách Tổ bảo vệ ANTT các ấp sau kiện toàn
+          </p>
+        </div>
+
+        {/* Hotline Box */}
+        <div className={styles.hotlineBox}>
+          <div className={styles.hotlineInfo}>
+            <h3>
+              <Shield size={18} /> Trực Ban Công An Xã Châu Thành
+            </h3>
+            <p>Tiếp nhận tin báo tội phạm, phản ánh ANTT và hỗ trợ khẩn cấp 24/7</p>
+          </div>
+          <a href="tel:02703872224" className={styles.hotlineCallBtn}>
+            <PhoneCall size={16} /> Gọi Trực Ban
+          </a>
+        </div>
+
+        {/* Search & Filter Controls */}
+        <div className={styles.controls}>
+          <div className={styles.searchBox}>
+            <Search size={18} className={styles.searchIcon} />
+            <input 
+              type="text"
+              className={styles.searchInput}
+              placeholder="Tìm theo họ tên, số điện thoại, tên ấp..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <select 
+            className={styles.filterSelect}
+            value={selectedAp}
+            onChange={(e) => setSelectedAp(e.target.value)}
+          >
+            <option value="ALL">-- Tất cả các ấp ({danhSachAp.length} ấp) --</option>
+            {danhSachAp.map((ap) => (
+              <option key={ap} value={ap}>{ap}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Summary Info */}
+        <div className={styles.summaryBar}>
+          <span>Hiển thị: <strong>{filteredData.length}</strong> / {anNinhData.length} nhân sự</span>
+          {selectedAp !== 'ALL' && <span>Đang lọc: <strong>{selectedAp}</strong></span>}
+        </div>
+
+        {/* Table View */}
+        <div className={styles.tableCard}>
+          <div className={styles.tableResponsive}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th style={{ width: '60px', textAlign: 'center' }}>STT</th>
+                  <th style={{ minWidth: '150px' }}>Tên Ấp</th>
+                  <th style={{ minWidth: '170px' }}>Họ Và Tên</th>
+                  <th style={{ minWidth: '130px' }}>Chức Danh</th>
+                  <th style={{ minWidth: '160px' }}>Số Điện Thoại (Zalo)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData.length > 0 ? (
+                  filteredData.map((item, index) => (
+                    <tr key={item.id}>
+                      <td style={{ textAlign: 'center', color: '#64748b' }}>{item.id}</td>
+                      <td>
+                        <span className={styles.apBadge}>{item.ap}</span>
+                      </td>
+                      <td>
+                        <strong>{item.hoTen}</strong>
+                      </td>
+                      <td>
+                        <span className={getBadgeClass(item.chucDanh)}>
+                          {item.chucDanh}
+                        </span>
+                      </td>
+                      <td>
+                        <a href={`tel:${item.sdtRaw}`} className={styles.callLink} title="Bấm để gọi điện">
+                          <Phone size={14} />
+                          <span>{item.sdt}</span>
+                        </a>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className={styles.emptyState}>
+                      Không tìm thấy nhân sự phù hợp với điều kiện tìm kiếm.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Note / Footer */}
+        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '13px', color: '#64748b' }}>
+          <p>Dữ liệu trích xuất từ Quyết định / Danh sách Tổ bảo vệ ANTT cơ sở Công an xã Châu Thành.</p>
+        </div>
       </div>
     </div>
   );

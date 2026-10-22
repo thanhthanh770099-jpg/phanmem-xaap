@@ -100,7 +100,7 @@ const QRCodePage = () => {
             description="Số điện thoại trực ban Công an xã và liên hệ bảo đảm ANTT"
             icon={Shield}
             color="#dc2626"
-            qrValue={`${window.location.origin}/`}
+            qrValue={`${window.location.origin}/an-ninh`}
           />
           <QRCodeCard 
             title="TRA CỨU BẢO HIỂM Y TẾ" 
