@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, Clock, Send, MessageCircle, Phone, Copy, Check } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Send, Phone, Copy, Check } from 'lucide-react';
 import styles from './Feedback.module.css';
 
 const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
@@ -26,7 +26,6 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const [status, setStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingFeedbacks, setIsLoadingFeedbacks] = useState(false);
-  const [autoSendMethod, setAutoSendMethod] = useState('zalo'); // 'zalo' | 'sms' | 'manual'
   const [copySuccess, setCopySuccess] = useState(false);
   const [handledSuccessData, setHandledSuccessData] = useState(null);
 
@@ -172,18 +171,6 @@ Trân trọng cảm ơn!`;
     window.open(`sms:${clean}?body=${encoded}`, '_blank');
   };
 
-  const handleSendZalo = (phone, message) => {
-    const clean = getCleanPhone(phone);
-    if (!clean) {
-      alert('Không tìm thấy số điện thoại của người dân!');
-      return;
-    }
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(message);
-    }
-    window.open(`https://zalo.me/${clean}`, '_blank');
-  };
-
   const handleCopyMessage = (message) => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(message);
@@ -209,13 +196,6 @@ Trân trọng cảm ơn!`;
       if (!response.ok) throw new Error(data.error || 'Có lỗi xảy ra');
       
       const msg = generateResultMessage(selectedFeedback.name, selectedFeedback.content, handleData.responseNote);
-
-      // Tự động mở Zalo / SMS nếu người dùng chọn
-      if (autoSendMethod === 'zalo' && selectedFeedback.phone) {
-        handleSendZalo(selectedFeedback.phone, msg);
-      } else if (autoSendMethod === 'sms' && selectedFeedback.phone) {
-        handleSendSMS(selectedFeedback.phone, msg);
-      }
 
       setHandledSuccessData({
         phone: selectedFeedback.phone,
@@ -434,23 +414,14 @@ Trân trọng cảm ơn!`;
           </div>
           <div className={styles.btnGroup}>
             {handledSuccessData.phone && (
-              <>
-                <button 
-                  type="button" 
-                  className={styles.zaloBtn}
-                  onClick={() => handleSendZalo(handledSuccessData.phone, handledSuccessData.message)}
-                >
-                  <MessageCircle size={16} /> Gửi qua Zalo ({handledSuccessData.phone})
-                </button>
-
-                <button 
-                  type="button" 
-                  className={styles.smsBtn}
-                  onClick={() => handleSendSMS(handledSuccessData.phone, handledSuccessData.message)}
-                >
-                  <Send size={16} /> Gửi tin nhắn SMS ({handledSuccessData.phone})
-                </button>
-              </>
+              <button 
+                type="button" 
+                className={styles.smsBtn}
+                onClick={() => handleSendSMS(handledSuccessData.phone, handledSuccessData.message)}
+                title="Mở ứng dụng tin nhắn trên thiết bị"
+              >
+                <Send size={16} /> Gửi tin nhắn SMS ({handledSuccessData.phone})
+              </button>
             )}
 
             <button 
@@ -508,16 +479,9 @@ Trân trọng cảm ơn!`;
               <div className={styles.btnGroup}>
                 <button 
                   type="button" 
-                  className={styles.zaloBtn}
-                  onClick={() => handleSendZalo(selectedFeedback.phone, generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
-                >
-                  <MessageCircle size={16} /> Gửi qua Zalo
-                </button>
-
-                <button 
-                  type="button" 
                   className={styles.smsBtn}
                   onClick={() => handleSendSMS(selectedFeedback.phone, generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note))}
+                  title="Mở ứng dụng tin nhắn trên thiết bị"
                 >
                   <Send size={16} /> Gửi qua SMS
                 </button>
@@ -566,56 +530,18 @@ Trân trọng cảm ơn!`;
             {handleData.responseFileUrl && <small style={{color:'green'}}>Đã chọn file đính kèm</small>}
           </div>
 
-          {/* Khung gửi kết quả về SĐT người dân */}
+          {/* Khung thông báo gửi kết quả SMS */}
           <div className={styles.sendCard}>
             <div className={styles.sendCardHeader}>
-              <Send size={18} /> Gửi kết quả về SĐT người dân: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.phone || 'Chưa có SĐT'}</strong>
+              <Send size={18} /> Kết quả sẽ gửi về SĐT người dân: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.phone || 'Chưa có SĐT'}</strong>
             </div>
-            <p style={{ margin: '0 0 10px', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-              Khi bấm Hoàn tất, hệ thống sẽ tự động chuẩn bị tin nhắn thông báo gửi về số điện thoại người dân.
+            <p style={{ margin: '0', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+              Sau khi bấm <strong>Hoàn tất xử lý</strong>, hệ thống sẽ lưu kết quả và tạo sẵn nội dung tin nhắn SMS để chuyển tiếp đến người dân.
             </p>
-            {selectedFeedback?.phone ? (
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '14px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                  <input 
-                    type="radio" 
-                    name="autoSendMethod" 
-                    value="zalo" 
-                    checked={autoSendMethod === 'zalo'}
-                    onChange={() => setAutoSendMethod('zalo')}
-                  />
-                  <span>Tự động mở gửi qua <strong>Zalo</strong></span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                  <input 
-                    type="radio" 
-                    name="autoSendMethod" 
-                    value="sms" 
-                    checked={autoSendMethod === 'sms'}
-                    onChange={() => setAutoSendMethod('sms')}
-                  />
-                  <span>Tự động mở gửi qua <strong>SMS</strong></span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                  <input 
-                    type="radio" 
-                    name="autoSendMethod" 
-                    value="manual" 
-                    checked={autoSendMethod === 'manual'}
-                    onChange={() => setAutoSendMethod('manual')}
-                  />
-                  <span>Chọn nút gửi thủ công</span>
-                </label>
-              </div>
-            ) : (
-              <div style={{ fontSize: '13px', color: '#b91c1c' }}>
-                Người dân không để lại số điện thoại khi gửi phản ánh này.
-              </div>
-            )}
           </div>
 
           <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
-            {isSubmitting ? 'Đang xử lý...' : 'Hoàn tất Xử Lý & Gửi Kết Quả'}
+            {isSubmitting ? 'Đang xử lý...' : 'Hoàn tất Xử Lý Ý Kiến'}
           </button>
         </form>
       )}
