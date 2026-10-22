@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, Clock, MessageCircle, Phone, Copy, Check, Download } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, MessageCircle, Phone, Copy, Check, Download, Edit, Trash2, X } from 'lucide-react';
 import styles from './Feedback.module.css';
 
 const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
+  const isAdmin = user?.role === 'admin' || user?.role === 'ubnd';
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'form' | 'handle'
   const [feedbacks, setFeedbacks] = useState([]);
   const [hamlets, setHamlets] = useState([]);
@@ -24,6 +25,19 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     responseFileUrl: ''
   });
 
+  // Edit Modal State (Dành cho Admin)
+  const [editingFeedback, setEditingFeedback] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    hamletId: '',
+    content: '',
+    status: 'pending',
+    responseNote: ''
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const [status, setStatus] = useState({ type: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingFeedbacks, setIsLoadingFeedbacks] = useState(false);
@@ -34,6 +48,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   useEffect(() => {
     if (viewMode === 'list') {
       fetchFeedbacks();
+      fetchHamlets();
       if (refreshUnreadFeedbackCount) {
         refreshUnreadFeedbackCount();
       }
@@ -242,6 +257,75 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     }
   };
 
+  const handleDeleteFeedback = async (id, name) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa phản ánh của "${name || 'người dân'}" không? Thao tác này sẽ xóa vĩnh viễn dữ liệu.`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra khi xóa');
+
+      setFeedbacks(prev => prev.filter(item => item.id !== id));
+      if (refreshUnreadFeedbackCount) {
+        refreshUnreadFeedbackCount();
+      }
+      alert('Đã xóa phản ánh thành công!');
+    } catch (err) {
+      alert(err.message || 'Lỗi khi xóa phản ánh');
+    }
+  };
+
+  const openEditModal = (fb) => {
+    setEditingFeedback(fb);
+    setEditFormData({
+      name: fb.name || '',
+      phone: fb.phone || '',
+      email: fb.email || '',
+      hamletId: fb.hamlet_id || (hamlets[0]?.id || ''),
+      content: fb.content || '',
+      status: fb.status || 'pending',
+      responseNote: fb.response_note || ''
+    });
+  };
+
+  const closeEditModal = () => {
+    setEditingFeedback(null);
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const submitEdit = async (e) => {
+    e.preventDefault();
+    if (!editingFeedback) return;
+    setIsUpdating(true);
+    try {
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${editingFeedback.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editFormData)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra khi cập nhật');
+
+      fetchFeedbacks();
+      if (refreshUnreadFeedbackCount) {
+        refreshUnreadFeedbackCount();
+      }
+      setEditingFeedback(null);
+      alert('Cập nhật phản ánh thành công!');
+    } catch (err) {
+      alert(err.message || 'Lỗi khi cập nhật ý kiến');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const openHandleView = (fb) => {
     setSelectedFeedback(fb);
     setHandleData({
@@ -270,11 +354,11 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           <thead>
             <tr>
               <th width="12%">Thời gian</th>
-              <th width="15%">Họ và tên</th>
-              {user.role !== 'user' && <th width="15%">Gửi đến</th>}
-              <th width="25%">Nội dung</th>
-              <th width="15%">Trạng thái</th>
-              <th width="15%">Thao tác</th>
+              <th width="14%">Họ và tên</th>
+              {user.role !== 'user' && <th width="13%">Gửi đến</th>}
+              <th width="24%">Nội dung</th>
+              <th width="12%">Trạng thái</th>
+              <th width={isAdmin ? "25%" : "15%"}>Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -307,15 +391,38 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                     )}
                   </td>
                   <td>
-                    {fb.status === 'pending' ? (
-                      <button className={styles.actionBtn} onClick={() => openHandleView(fb)}>
-                        Xử lý ý kiến
-                      </button>
-                    ) : (
-                      <button className={styles.secondaryBtn} style={{margin:0, padding:'6px 12px'}} onClick={() => openHandleView(fb)}>
-                        Xem kết quả
-                      </button>
-                    )}
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {fb.status === 'pending' ? (
+                        <button className={styles.actionBtn} style={{ padding: '5px 10px', fontSize: '13px' }} onClick={() => openHandleView(fb)}>
+                          Xử lý
+                        </button>
+                      ) : (
+                        <button className={styles.secondaryBtn} style={{ margin: 0, padding: '5px 10px', fontSize: '13px' }} onClick={() => openHandleView(fb)}>
+                          Xem kết quả
+                        </button>
+                      )}
+
+                      {isAdmin && (
+                        <>
+                          <button 
+                            type="button" 
+                            className={styles.editBtn} 
+                            onClick={() => openEditModal(fb)}
+                            title="Sửa thông tin phản ánh"
+                          >
+                            <Edit size={13} /> Sửa
+                          </button>
+                          <button 
+                            type="button" 
+                            className={styles.deleteBtn} 
+                            onClick={() => handleDeleteFeedback(fb.id, fb.name)}
+                            title="Xóa phản ánh này"
+                          >
+                            <Trash2 size={13} /> Xóa
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -619,11 +726,127 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     </>
   );
 
+  const renderEditModal = () => {
+    if (!editingFeedback) return null;
+    return (
+      <div className={styles.modalOverlay} onClick={closeEditModal}>
+        <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+          <div className={styles.modalHeader}>
+            <h3 className={styles.modalTitle}>Chỉnh Sửa Ý Kiến Phản Ánh</h3>
+            <button type="button" className={styles.closeBtn} onClick={closeEditModal}>
+              <X size={20} />
+            </button>
+          </div>
+          <form onSubmit={submitEdit}>
+            <div className={styles.modalBody}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Họ và tên người gửi <span style={{ color: 'red' }}>*</span></label>
+                <input 
+                  type="text" 
+                  name="name" 
+                  value={editFormData.name} 
+                  onChange={handleEditChange} 
+                  className={styles.input} 
+                  required 
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Số điện thoại liên hệ <span style={{ color: 'red' }}>*</span></label>
+                <input 
+                  type="tel" 
+                  name="phone" 
+                  value={editFormData.phone} 
+                  onChange={handleEditChange} 
+                  className={styles.input} 
+                  required 
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Địa chỉ Email (Tùy chọn)</label>
+                <input 
+                  type="email" 
+                  name="email" 
+                  value={editFormData.email} 
+                  onChange={handleEditChange} 
+                  className={styles.input} 
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Gửi đến Ấp <span style={{ color: 'red' }}>*</span></label>
+                <select 
+                  name="hamletId" 
+                  value={editFormData.hamletId} 
+                  onChange={handleEditChange} 
+                  className={styles.select} 
+                  required
+                >
+                  {hamlets.map(h => (
+                    <option key={h.id} value={h.id}>{h.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Nội dung phản ánh <span style={{ color: 'red' }}>*</span></label>
+                <textarea 
+                  name="content" 
+                  value={editFormData.content} 
+                  onChange={handleEditChange} 
+                  className={styles.textarea} 
+                  required 
+                  style={{ minHeight: '80px' }}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Trạng thái xử lý</label>
+                <select 
+                  name="status" 
+                  value={editFormData.status} 
+                  onChange={handleEditChange} 
+                  className={styles.select}
+                >
+                  <option value="pending">Chờ xử lý</option>
+                  <option value="handled">Đã xử lý</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Nội dung trả lời / giải quyết</label>
+                <textarea 
+                  name="responseNote" 
+                  value={editFormData.responseNote} 
+                  onChange={handleEditChange} 
+                  className={styles.textarea} 
+                  placeholder="Nhập nội dung xử lý giải quyết..."
+                  style={{ minHeight: '80px' }}
+                />
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button type="button" className={styles.secondaryBtn} onClick={closeEditModal} style={{ margin: 0 }}>
+                Hủy bỏ
+              </button>
+              <button type="submit" className={styles.submitBtn} disabled={isUpdating} style={{ margin: 0 }}>
+                {isUpdating ? 'Đang lưu...' : 'Lưu Thay Đổi'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.container}>
       {viewMode === 'list' && renderList()}
       {viewMode === 'form' && renderForm()}
       {viewMode === 'handle' && renderHandle()}
+      {renderEditModal()}
     </div>
   );
 };

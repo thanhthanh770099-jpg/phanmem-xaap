@@ -545,6 +545,50 @@ app.post('/api/feedbacks/send-email', async (req, res) => {
   }
 });
 
+// API 5.4: Xóa ý kiến phản ánh (Dành cho Admin)
+app.delete('/api/feedbacks/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query('DELETE FROM citizen_feedbacks WHERE id = $1', [id]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy ý kiến để xóa' });
+    }
+    res.json({ message: 'Đã xóa ý kiến phản ánh thành công' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API 5.5: Chỉnh sửa ý kiến phản ánh (Dành cho Admin)
+app.put('/api/feedbacks/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, phone, email, hamletId, content, status, responseNote, responseFileUrl } = req.body;
+  try {
+    const { rows } = await pool.query(
+      `UPDATE citizen_feedbacks 
+       SET name = COALESCE($1, name),
+           phone = COALESCE($2, phone),
+           email = $3,
+           hamlet_id = COALESCE($4, hamlet_id),
+           content = COALESCE($5, content),
+           status = COALESCE($6, status),
+           response_note = $7,
+           response_file_url = $8
+       WHERE id = $9
+       RETURNING *`,
+      [name, phone, email || null, hamletId, content, status, responseNote || null, responseFileUrl || null, id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy ý kiến để cập nhật' });
+    }
+
+    res.json({ message: 'Cập nhật ý kiến thành công', feedback: rows[0] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Backend server đang chạy tại http://localhost:${port}`);
 });
