@@ -1,9 +1,31 @@
 .pageWrapper {
   padding: 20px;
   background-color: #f0f4f8;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   justify-content: center;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f0f4f8;
+}
+
+.pageWrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.pageWrapper::-webkit-scrollbar-track {
+  background: #f0f4f8;
+}
+
+.pageWrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.pageWrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .posterContainer {
