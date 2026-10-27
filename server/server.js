@@ -26,7 +26,10 @@ pool.connect()
         ALTER TABLE citizen_feedbacks
         ADD COLUMN IF NOT EXISTS forward_note TEXT,
         ADD COLUMN IF NOT EXISTS forwarded_at TIMESTAMP,
-        ADD COLUMN IF NOT EXISTS forwarded_by VARCHAR(255);
+        ADD COLUMN IF NOT EXISTS forwarded_by VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS target_department VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS department_note TEXT,
+        ADD COLUMN IF NOT EXISTS department_assigned_at TIMESTAMP;
       `);
     } catch (e) {
       console.log("Columns check:", e.message);
@@ -541,7 +544,7 @@ app.put('/api/feedbacks/:id/handle', async (req, res) => {
 // API 5.2.1: Chuyển ý kiến lên UBND Xã (khi ấp không xử lý được)
 app.put('/api/feedbacks/:id/forward-to-commune', async (req, res) => {
   const { id } = req.params;
-  const { forwardNote, forwardedBy } = req.body;
+  const { forwardNote, forwardedBy, targetDepartment } = req.body;
 
   try {
     const { rows } = await pool.query(
@@ -549,10 +552,16 @@ app.put('/api/feedbacks/:id/forward-to-commune', async (req, res) => {
        SET status = 'forwarded_to_commune',
            forward_note = $1,
            forwarded_at = CURRENT_TIMESTAMP,
-           forwarded_by = $2
-       WHERE id = $3
+           forwarded_by = $2,
+           target_department = $3
+       WHERE id = $4
        RETURNING *`,
-      [forwardNote || 'Chuyển tiếp lên UBND Xã do vượt thẩm quyền giải quyết của ấp', forwardedBy || 'Ban nhân dân ấp', id]
+      [
+        forwardNote || 'Chuyển tiếp lên UBND Xã do vượt thẩm quyền giải quyết của ấp', 
+        forwardedBy || 'Ban nhân dân ấp', 
+        targetDepartment || null,
+        id
+      ]
     );
 
     if (rows.length === 0) {
@@ -575,7 +584,10 @@ app.put('/api/feedbacks/:id/recall-forward', async (req, res) => {
        SET status = 'pending',
            forward_note = NULL,
            forwarded_at = NULL,
-           forwarded_by = NULL
+           forwarded_by = NULL,
+           target_department = NULL,
+           department_note = NULL,
+           department_assigned_at = NULL
        WHERE id = $1 AND status = 'forwarded_to_commune'
        RETURNING *`,
       [id]
@@ -586,6 +598,36 @@ app.put('/api/feedbacks/:id/recall-forward', async (req, res) => {
     }
 
     res.json({ message: 'Đã thu hồi chuyển tiếp thành công', feedback: rows[0] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API 5.2.3: Phân công / Chuyển tiếp cho phòng ban chuyên môn tại xã
+app.put('/api/feedbacks/:id/assign-department', async (req, res) => {
+  const { id } = req.params;
+  const { targetDepartment, departmentNote } = req.body;
+
+  if (!targetDepartment) {
+    return res.status(400).json({ error: 'Vui lòng chọn phòng ban chuyên môn' });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      `UPDATE citizen_feedbacks 
+       SET target_department = $1,
+           department_note = $2,
+           department_assigned_at = CURRENT_TIMESTAMP
+       WHERE id = $3
+       RETURNING *`,
+      [targetDepartment, departmentNote || null, id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy ý kiến' });
+    }
+
+    res.json({ message: `Đã chuyển ý kiến cho ${targetDepartment} thành công`, feedback: rows[0] });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -627,8 +669,15 @@ app.delete('/api/feedbacks/:id', async (req, res) => {
 // API 5.5: Chỉnh sửa ý kiến phản ánh (Dành cho Admin)
 app.put('/api/feedbacks/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, phone, email, hamletId, content, status, responseNote, responseFileUrl } = req.body;
+  const { 
+    name, phone, email, hamletId, content, status, 
+    responseNote, responseFileUrl, forwardNote, 
+    targetDepartment, departmentNote 
+  } = req.body;
   try {
+    const keepTargetDept = targetDepartment === undefined;
+    const keepDeptNote = departmentNote === undefined;
+
     const { rows } = await pool.query(
       `UPDATE citizen_feedbacks 
        SET name = COALESCE($1, name),
@@ -638,10 +687,25 @@ app.put('/api/feedbacks/:id', async (req, res) => {
            content = COALESCE($5, content),
            status = COALESCE($6, status),
            response_note = $7,
-           response_file_url = $8
-       WHERE id = $9
+           response_file_url = $8,
+           forward_note = COALESCE($9, forward_note),
+           target_department = CASE WHEN $10::boolean THEN target_department ELSE $11 END,
+           department_note = CASE WHEN $12::boolean THEN department_note ELSE $13 END,
+           department_assigned_at = CASE 
+             WHEN $10::boolean THEN department_assigned_at 
+             WHEN $11 IS NOT NULL AND target_department IS DISTINCT FROM $11 THEN CURRENT_TIMESTAMP
+             WHEN $11 IS NULL THEN NULL
+             ELSE department_assigned_at
+           END
+       WHERE id = $14
        RETURNING *`,
-      [name, phone, email || null, hamletId, content, status, responseNote || null, responseFileUrl || null, id]
+      [
+        name, phone, email || null, hamletId, content, status, 
+        responseNote || null, responseFileUrl || null, forwardNote || null,
+        keepTargetDept, targetDepartment || null,
+        keepDeptNote, departmentNote || null,
+        id
+      ]
     );
 
     if (rows.length === 0) {

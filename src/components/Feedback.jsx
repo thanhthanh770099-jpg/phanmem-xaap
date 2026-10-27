@@ -6,6 +6,13 @@ import {
 } from 'lucide-react';
 import styles from './Feedback.module.css';
 
+export const DEPARTMENTS = [
+  'Phòng Văn hóa - Xã hội',
+  'Phòng Kinh tế',
+  'Văn phòng HĐND và UBND',
+  'Trung tâm Phục vụ Hành chính công'
+];
+
 const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const isAdmin = user?.role === 'admin' || user?.role === 'ubnd';
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'form' | 'handle'
@@ -29,6 +36,13 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     responseFileUrl: ''
   });
 
+  // Department assignment state (Chuyển phòng ban chuyên môn)
+  const [targetDepartment, setTargetDepartment] = useState('');
+  const [deptNote, setDeptNote] = useState('');
+  const [filterDepartment, setFilterDepartment] = useState('ALL');
+  const [isAssigningDept, setIsAssigningDept] = useState(false);
+  const [isChangingDept, setIsChangingDept] = useState(false);
+
   // Forward Modal State (Chuyển lên Xã)
   const [forwardModalFeedback, setForwardModalFeedback] = useState(null);
   const [forwardNote, setForwardNote] = useState('');
@@ -44,7 +58,9 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     content: '',
     status: 'pending',
     responseNote: '',
-    forwardNote: ''
+    forwardNote: '',
+    targetDepartment: '',
+    departmentNote: ''
   });
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -269,12 +285,14 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
 
   const openForwardModal = (fb) => {
     setForwardModalFeedback(fb);
+    setTargetDepartment('');
     setForwardNote('Vấn đề vượt quá thẩm quyền giải quyết của Ban nhân dân ấp, kính chuyển UBND xã Châu Thành xem xét chỉ đạo giải quyết.');
   };
 
   const closeForwardModal = () => {
     setForwardModalFeedback(null);
     setForwardNote('');
+    setTargetDepartment('');
   };
 
   const submitForward = async (e) => {
@@ -287,7 +305,8 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           forwardNote: forwardNote.trim(),
-          forwardedBy: user.name || 'Ban nhân dân ấp'
+          forwardedBy: user.name || 'Ban nhân dân ấp',
+          targetDepartment: targetDepartment || null
         })
       });
       const data = await res.json();
@@ -303,7 +322,8 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           status: 'forwarded_to_commune',
           forward_note: forwardNote.trim(),
           forwarded_at: new Date().toISOString(),
-          forwarded_by: user.name || 'Ban nhân dân ấp'
+          forwarded_by: user.name || 'Ban nhân dân ấp',
+          target_department: targetDepartment || null
         }));
       }
 
@@ -315,6 +335,43 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       alert(err.message || 'Lỗi khi chuyển tiếp ý kiến');
     } finally {
       setIsForwarding(false);
+    }
+  };
+
+  const handleAssignDepartment = async (deptToAssign) => {
+    if (!selectedFeedback) return;
+    const finalDept = deptToAssign || targetDepartment;
+    if (!finalDept) {
+      alert('Vui lòng chọn phòng ban chuyên môn để chuyển.');
+      return;
+    }
+    setIsAssigningDept(true);
+    try {
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${selectedFeedback.id}/assign-department`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetDepartment: finalDept,
+          departmentNote: deptNote.trim()
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra khi chuyển phòng ban');
+
+      alert(`Đã chuyển ý kiến cho ${finalDept} thành công!`);
+      setSelectedFeedback(prev => ({
+        ...prev,
+        target_department: finalDept,
+        department_note: deptNote.trim(),
+        department_assigned_at: new Date().toISOString()
+      }));
+      setIsChangingDept(false);
+      setDeptNote('');
+      fetchFeedbacks();
+    } catch (err) {
+      alert(err.message || 'Lỗi khi chuyển phòng ban');
+    } finally {
+      setIsAssigningDept(false);
     }
   };
 
@@ -337,7 +394,10 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           status: 'pending',
           forward_note: null,
           forwarded_at: null,
-          forwarded_by: null
+          forwarded_by: null,
+          target_department: null,
+          department_note: null,
+          department_assigned_at: null
         }));
       }
 
@@ -381,7 +441,9 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       content: fb.content || '',
       status: fb.status || 'pending',
       responseNote: fb.response_note || '',
-      forwardNote: fb.forward_note || ''
+      forwardNote: fb.forward_note || '',
+      targetDepartment: fb.target_department || '',
+      departmentNote: fb.department_note || ''
     });
   };
 
@@ -426,73 +488,107 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       responseNote: fb.response_note || '',
       responseFileUrl: fb.response_file_url || ''
     });
+    setTargetDepartment(fb.target_department || '');
+    setDeptNote(fb.department_note || '');
+    setIsChangingDept(false);
     setHandledSuccessData(null);
     setStatus({ type: '', message: '' });
     setViewMode('handle');
   };
 
-  const renderList = () => (
-    <>
-      <div className={styles.header}>
-        <h2 className={styles.title}>Danh Sách Ý Kiến, Kiến Nghị</h2>
-        <button className={styles.primaryBtn} onClick={() => {
-          setViewMode('form');
-          setStatus({ type: '', message: '' });
-        }}>
-          + Ghi nhận ý kiến mới
-        </button>
-      </div>
+  const renderList = () => {
+    const filteredFeedbacks = feedbacks.filter(fb => {
+      if (filterDepartment === 'ALL') return true;
+      if (filterDepartment === 'UNASSIGNED') return !fb.target_department;
+      return fb.target_department === filterDepartment;
+    });
 
-      <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th width="12%">Thời gian</th>
-              <th width="14%">Họ và tên</th>
-              {user.role !== 'user' && <th width="13%">Gửi đến</th>}
-              <th width="24%">Nội dung</th>
-              <th width="12%">Trạng thái</th>
-              <th width={isAdmin ? "25%" : "15%"}>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoadingFeedbacks ? (
+    return (
+      <>
+        <div className={styles.header}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+            <h2 className={styles.title}>Danh Sách Ý Kiến, Kiến Nghị</h2>
+            {isAdmin && (
+              <select
+                value={filterDepartment}
+                onChange={(e) => setFilterDepartment(e.target.value)}
+                className={styles.select}
+                style={{ padding: '6px 10px', fontSize: '13px', width: 'auto', borderRadius: '6px', borderColor: '#cbd5e1' }}
+              >
+                <option value="ALL">-- Tất cả phòng ban ({feedbacks.length}) --</option>
+                {DEPARTMENTS.map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
+                <option value="UNASSIGNED">Chưa chuyển phòng</option>
+              </select>
+            )}
+          </div>
+          <button className={styles.primaryBtn} onClick={() => {
+            setViewMode('form');
+            setStatus({ type: '', message: '' });
+          }}>
+            + Ghi nhận ý kiến mới
+          </button>
+        </div>
+
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead>
               <tr>
-                <td colSpan={user.role !== 'user' ? 6 : 5} style={{ textAlign: 'center' }}>Đang tải dữ liệu...</td>
+                <th width="12%">Thời gian</th>
+                <th width="14%">Họ và tên</th>
+                {user.role !== 'user' && <th width="13%">Gửi đến</th>}
+                <th width="24%">Nội dung</th>
+                <th width="14%">Trạng thái</th>
+                <th width={isAdmin ? "23%" : "15%"}>Thao tác</th>
               </tr>
-            ) : !Array.isArray(feedbacks) || feedbacks.length === 0 ? (
-              <tr>
-                <td colSpan={user.role !== 'user' ? 6 : 5}>
-                  <div className={styles.emptyState}>Chưa có ý kiến nào được ghi nhận.</div>
-                </td>
-              </tr>
-            ) : (
-              feedbacks.map(fb => (
-                <tr key={fb.id}>
-                  <td>{new Date(fb.created_at).toLocaleString('vi-VN')}</td>
-                  <td>
-                    <strong>{fb.name}</strong><br/>
-                    <small>{fb.phone}</small>
-                    {fb.email && <><br/><small style={{ color: '#0284c7' }}>{fb.email}</small></>}
+            </thead>
+            <tbody>
+              {isLoadingFeedbacks ? (
+                <tr>
+                  <td colSpan={user.role !== 'user' ? 6 : 5} style={{ textAlign: 'center' }}>Đang tải dữ liệu...</td>
+                </tr>
+              ) : !Array.isArray(filteredFeedbacks) || filteredFeedbacks.length === 0 ? (
+                <tr>
+                  <td colSpan={user.role !== 'user' ? 6 : 5}>
+                    <div className={styles.emptyState}>Chưa có ý kiến nào được ghi nhận.</div>
                   </td>
-                  {user.role !== 'user' && <td>{fb.hamlet_name}</td>}
-                  <td style={{ whiteSpace: 'pre-wrap' }}>{fb.content}</td>
-                  <td>
-                    {fb.status === 'handled' ? (
-                      <span className={`${styles.badge} ${styles.badgeHandled}`}>
-                        <CheckCircle size={12} style={{marginRight:4, verticalAlign:'middle'}}/> Đã xử lý
-                      </span>
-                    ) : fb.status === 'forwarded_to_commune' ? (
-                      <span className={`${styles.badge} ${isAdmin ? styles.badgeForwardedAlert : styles.badgeForwarded}`} title={`Đã chuyển tiếp lên UBND Xã (${new Date(fb.forwarded_at || fb.created_at).toLocaleDateString('vi-VN')})`}>
-                        <Send size={12} style={{marginRight:4, verticalAlign:'middle'}}/> 
-                        {isAdmin ? 'Ấp chuyển lên Xã' : 'Đã chuyển lên Xã'}
-                      </span>
-                    ) : (
-                      <span className={`${styles.badge} ${styles.badgePending}`}>
-                        <Clock size={12} style={{marginRight:4, verticalAlign:'middle'}}/> Chờ xử lý
-                      </span>
-                    )}
-                  </td>
+                </tr>
+              ) : (
+                filteredFeedbacks.map(fb => (
+                  <tr key={fb.id}>
+                    <td>{new Date(fb.created_at).toLocaleString('vi-VN')}</td>
+                    <td>
+                      <strong>{fb.name}</strong><br/>
+                      <small>{fb.phone}</small>
+                      {fb.email && <><br/><small style={{ color: '#0284c7' }}>{fb.email}</small></>}
+                    </td>
+                    {user.role !== 'user' && <td>{fb.hamlet_name}</td>}
+                    <td style={{ whiteSpace: 'pre-wrap' }}>{fb.content}</td>
+                    <td>
+                      {fb.status === 'handled' ? (
+                        <span className={`${styles.badge} ${styles.badgeHandled}`}>
+                          <CheckCircle size={12} style={{marginRight:4, verticalAlign:'middle'}}/> Đã xử lý
+                        </span>
+                      ) : fb.status === 'forwarded_to_commune' ? (
+                        <span className={`${styles.badge} ${isAdmin ? styles.badgeForwardedAlert : styles.badgeForwarded}`} title={`Đã chuyển tiếp lên UBND Xã (${new Date(fb.forwarded_at || fb.created_at).toLocaleDateString('vi-VN')})`}>
+                          <Send size={12} style={{marginRight:4, verticalAlign:'middle'}}/> 
+                          {isAdmin ? 'Ấp chuyển lên Xã' : 'Đã chuyển lên Xã'}
+                        </span>
+                      ) : (
+                        <span className={`${styles.badge} ${styles.badgePending}`}>
+                          <Clock size={12} style={{marginRight:4, verticalAlign:'middle'}}/> Chờ xử lý
+                        </span>
+                      )}
+
+                      {fb.target_department && (
+                        <div style={{ marginTop: '5px' }}>
+                          <span className={styles.deptBadge} title={`Chuyển đến: ${fb.target_department}`}>
+                            <Building2 size={11} /> {fb.target_department}
+                          </span>
+                        </div>
+                      )}
+                    </td>
                   <td>
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                       {fb.status === 'pending' ? (
@@ -563,8 +659,9 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           </tbody>
         </table>
       </div>
-    </>
-  );
+      </>
+    );
+  };
 
   const renderForm = () => (
     <>
@@ -848,6 +945,13 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
               (Hiện tại ý kiến đang chờ UBND Xã tiếp nhận và xử lý)
             </span>
           </div>
+
+          {selectedFeedback?.target_department && (
+            <div style={{ marginTop: '14px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', padding: '10px 14px', color: '#1e40af', fontSize: '13.5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Building2 size={18} color="#2563eb" />
+              <span>Phòng ban chuyên môn Xã phụ trách: <strong style={{ color: '#1d4ed8' }}>{selectedFeedback.target_department}</strong></span>
+            </div>
+          )}
         </div>
       ) : (
         <>
@@ -864,6 +968,106 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                 <strong>Lý do chuyển của Ấp:</strong> {selectedFeedback.forward_note || 'Vấn đề vượt quá thẩm quyền cấp ấp, kính chuyển UBND xã giải quyết.'}
               </div>
             </div>
+          )}
+
+          {/* Phân công / Chuyển cho các phòng ban chuyên môn (Dành cho Xã) */}
+          {isAdmin && (
+            <>
+              {selectedFeedback?.target_department && !isChangingDept ? (
+                <div className={styles.assignedDeptBox}>
+                  <div className={styles.assignedDeptInfo}>
+                    <Building2 size={24} color="#16a34a" />
+                    <div>
+                      <div>
+                        Đơn vị chuyên môn phụ trách: <strong style={{ color: '#15803d', fontSize: '15px' }}>{selectedFeedback.target_department}</strong>
+                      </div>
+                      {selectedFeedback.department_note && (
+                        <div style={{ fontSize: '13px', color: '#475569', fontWeight: 'normal', marginTop: '3px' }}>
+                          Ghi chú phân công: <em>"{selectedFeedback.department_note}"</em>
+                        </div>
+                      )}
+                      {selectedFeedback.department_assigned_at && (
+                        <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 'normal', marginTop: '2px' }}>
+                          Thời gian chuyển: {new Date(selectedFeedback.department_assigned_at).toLocaleString('vi-VN')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    className={styles.changeDeptBtn}
+                    onClick={() => {
+                      setIsChangingDept(true);
+                      setTargetDepartment(selectedFeedback.target_department || '');
+                    }}
+                  >
+                    Chuyển sang phòng khác
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.deptAssignCard}>
+                  <div className={styles.deptAssignTitle}>
+                    <Building2 size={18} color="#1e3c72" />
+                    <span>
+                      {selectedFeedback?.target_department ? 'Chuyển sang phòng ban chuyên môn khác:' : 'Chuyển cho phòng ban chuyên môn xử lý theo lĩnh vực:'}
+                    </span>
+                  </div>
+                  <p style={{ margin: '0 0 10px', fontSize: '13px', color: '#64748b' }}>
+                    Chọn phòng ban phù hợp theo từng lĩnh vực phản ánh của người dân để chuyển phòng đó xử lý:
+                  </p>
+                  <div className={styles.deptChips}>
+                    {DEPARTMENTS.map(dept => (
+                      <button
+                        key={dept}
+                        type="button"
+                        className={`${styles.deptChip} ${targetDepartment === dept ? styles.deptChipActive : ''}`}
+                        onClick={() => setTargetDepartment(dept)}
+                      >
+                        🏢 {dept}
+                      </button>
+                    ))}
+                  </div>
+
+                  {targetDepartment && (
+                    <div style={{ marginTop: '12px', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '12px' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#1e3c72', marginBottom: '6px' }}>
+                        Ghi chú phân công / giao việc cho {targetDepartment} (Tùy chọn):
+                      </div>
+                      <input 
+                        type="text"
+                        placeholder={`Ví dụ: Giao ${targetDepartment} kiểm tra thực địa, tham mưu trả lời trước ngày...`}
+                        value={deptNote}
+                        onChange={(e) => setDeptNote(e.target.value)}
+                        className={styles.input}
+                        style={{ marginBottom: '10px' }}
+                      />
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <button
+                          type="button"
+                          className={styles.primaryBtn}
+                          style={{ padding: '8px 16px', fontSize: '13px', display: 'inline-flex', alignItems: 'center' }}
+                          disabled={isAssigningDept}
+                          onClick={() => handleAssignDepartment(targetDepartment)}
+                        >
+                          <Send size={14} style={{ marginRight: 6 }} />
+                          {isAssigningDept ? 'Đang chuyển...' : `Xác Nhận Chuyển Cho ${targetDepartment}`}
+                        </button>
+                        {isChangingDept && (
+                          <button
+                            type="button"
+                            className={styles.secondaryBtn}
+                            style={{ margin: 0, padding: '8px 14px', fontSize: '13px' }}
+                            onClick={() => setIsChangingDept(false)}
+                          >
+                            Hủy
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
 
           {!isAdmin && selectedFeedback?.status === 'pending' && (
@@ -970,6 +1174,37 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                 <div style={{ fontSize: '13px', color: '#334155', fontStyle: 'italic', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   "{forwardModalFeedback.content}"
                 </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Chuyển theo lĩnh vực phòng ban (Tùy chọn)
+                </label>
+                <select 
+                  value={targetDepartment} 
+                  onChange={(e) => {
+                    const dept = e.target.value;
+                    setTargetDepartment(dept);
+                    if (dept === 'Phòng Văn hóa - Xã hội') {
+                      setForwardNote('Phản ánh thuộc lĩnh vực văn hóa - xã hội, y tế, giáo dục, chính sách, kính chuyển UBND xã và Phòng Văn hóa - Xã hội xem xét giải quyết.');
+                    } else if (dept === 'Phòng Kinh tế') {
+                      setForwardNote('Phản ánh thuộc lĩnh vực kinh tế, sản xuất nông nghiệp, giao thông thủy lợi, thương mại, kính chuyển UBND xã và Phòng Kinh tế xem xét giải quyết.');
+                    } else if (dept === 'Văn phòng HĐND và UBND') {
+                      setForwardNote('Kiến nghị liên quan đến công tác chỉ đạo điều hành, tổng hợp, kính chuyển Văn phòng HĐND và UBND xã tham mưu giải quyết.');
+                    } else if (dept === 'Trung tâm Phục vụ Hành chính công') {
+                      setForwardNote('Phản ánh liên quan đến giải quyết thủ tục hành chính, dịch vụ công, kính chuyển Trung tâm Phục vụ Hành chính công xử lý.');
+                    }
+                  }}
+                  className={styles.select}
+                >
+                  <option value="">-- Để UBND Xã tự phân công --</option>
+                  {DEPARTMENTS.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+                <small style={{ color: '#64748b', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                  Nếu xác định được phản ánh thuộc lĩnh vực nào, ấp có thể chọn phòng ban đó để xã phân công ngay.
+                </small>
               </div>
 
               <div className={styles.formGroup}>
@@ -1133,6 +1368,35 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                     className={styles.textarea} 
                     placeholder="Nhập lý do chuyển lên xã..."
                     style={{ minHeight: '60px' }}
+                  />
+                </div>
+              )}
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Phòng ban chuyên môn phụ trách</label>
+                <select 
+                  name="targetDepartment" 
+                  value={editFormData.targetDepartment || ''} 
+                  onChange={handleEditChange} 
+                  className={styles.select}
+                >
+                  <option value="">-- Chưa chuyển phòng ban --</option>
+                  {DEPARTMENTS.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+
+              {editFormData.targetDepartment && (
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Ghi chú phân công cho phòng ban</label>
+                  <input 
+                    type="text" 
+                    name="departmentNote" 
+                    value={editFormData.departmentNote || ''} 
+                    onChange={handleEditChange} 
+                    className={styles.input} 
+                    placeholder="Ghi chú phân công..."
                   />
                 </div>
               )}
