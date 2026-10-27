@@ -51,6 +51,21 @@ const PublicAnNinh = () => {
           </p>
         </div>
 
+        {/* Hotline Trực ban Công an xã Châu Thành */}
+        <div className={styles.hotlineBox}>
+          <div className={styles.hotlineInfo}>
+            <h3>
+              <Phone size={18} color="#dc2626" />
+              Trực ban Công an xã Châu Thành
+            </h3>
+            <p>Đường dây nóng tiếp nhận tin báo ANTT, phản ánh khẩn cấp 24/7</p>
+          </div>
+          <a href="tel:02943872064" className={styles.hotlineCallBtn} title="Bấm để gọi ngay">
+            <Phone size={16} />
+            <span>02943.872.064</span>
+          </a>
+        </div>
+
         {/* Search & Filter Controls */}
         <div className={styles.controls}>
           <div className={styles.searchBox}>

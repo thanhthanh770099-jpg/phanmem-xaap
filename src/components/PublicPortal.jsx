@@ -3,32 +3,69 @@ import styles from './PublicPortal.module.css';
 import { 
   Landmark, ShieldCheck, MessageSquare, 
   CreditCard, Smartphone, Users, 
-  Shield, Star, Heart, Users as UsersIcon, Shield as ShieldIcon, Activity
+  Shield, Star, Heart, Users as UsersIcon, Shield as ShieldIcon, Activity, Phone
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
-const ClickableQRCodeCard = ({ title, description, icon: Icon, imageSrc, color, qrValue, href, isExternal }) => (
-  <a href={href} target={isExternal ? "_blank" : "_self"} rel={isExternal ? "noopener noreferrer" : ""} className={styles.qrCard} style={{ borderColor: color, textDecoration: 'none', color: 'inherit' }}>
-    {imageSrc ? (
-      <div className={styles.iconImageWrapper}>
-        <img src={imageSrc} alt={title} className={styles.iconImage} />
-      </div>
-    ) : (
-      <div className={styles.iconCircle} style={{ backgroundColor: color }}>
-        <Icon size={28} color="white" />
-      </div>
-    )}
-    <h3 className={styles.cardTitle} style={{ color: color }}>{title}</h3>
-    <div className={styles.qrWrapper}>
-      {qrValue ? (
-        <QRCodeSVG value={qrValue} size={130} level="M" />
+const ClickableQRCodeCard = ({ title, description, icon: Icon, imageSrc, color, qrValue, href, isExternal, phoneInfo }) => {
+  const handleCardClick = () => {
+    if (isExternal) {
+      window.open(href, '_blank', 'noopener,noreferrer');
+    } else {
+      window.location.href = href;
+    }
+  };
+
+  return (
+    <div 
+      onClick={handleCardClick} 
+      className={styles.qrCard} 
+      style={{ borderColor: color, cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
+      role="link"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          handleCardClick();
+        }
+      }}
+    >
+      {imageSrc ? (
+        <div className={styles.iconImageWrapper}>
+          <img src={imageSrc} alt={title} className={styles.iconImage} />
+        </div>
       ) : (
-        <div className={styles.qrPlaceholder}>N/A</div>
+        <div className={styles.iconCircle} style={{ backgroundColor: color }}>
+          <Icon size={28} color="white" />
+        </div>
       )}
+      <h3 className={styles.cardTitle} style={{ color: color }}>{title}</h3>
+      <div className={styles.qrWrapper}>
+        {qrValue ? (
+          <QRCodeSVG value={qrValue} size={130} level="M" />
+        ) : (
+          <div className={styles.qrPlaceholder}>N/A</div>
+        )}
+      </div>
+      {phoneInfo && (
+        <div 
+          className={styles.phoneBadge}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className={styles.phoneBadgeLabel}>{phoneInfo.label}</div>
+          <a 
+            href={`tel:${phoneInfo.numberRaw || phoneInfo.number.replace(/\./g, '')}`} 
+            className={styles.phoneBadgeNumber}
+            title="Bấm để gọi ngay"
+          >
+            <Phone size={13} style={{ marginRight: '4px' }} />
+            <span>{phoneInfo.number}</span>
+          </a>
+        </div>
+      )}
+      <p className={styles.cardDesc}>{description}</p>
     </div>
-    <p className={styles.cardDesc}>{description}</p>
-  </a>
-);
+  );
+};
 
 const PublicPortal = () => {
   return (
@@ -105,11 +142,16 @@ const PublicPortal = () => {
           />
           <ClickableQRCodeCard 
             title="AN NINH TRẬT TỰ" 
-            description="Số điện thoại trực ban Công an xã và liên hệ bảo đảm ANTT"
+            description="Quét mã tra cứu danh sách Tổ bảo vệ ANTT cơ sở các ấp"
             icon={Shield}
             color="#dc2626"
             qrValue={`${window.location.origin}/an-ninh`}
             href="/an-ninh"
+            phoneInfo={{
+              label: 'Trực ban Công an xã Châu Thành:',
+              number: '02943.872.064',
+              numberRaw: '02943872064'
+            }}
           />
           <ClickableQRCodeCard 
             title="TRA CỨU BẢO HIỂM Y TẾ" 

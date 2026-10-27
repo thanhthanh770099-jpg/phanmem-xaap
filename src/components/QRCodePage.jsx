@@ -3,11 +3,11 @@ import styles from './QRCodePage.module.css';
 import { 
   Landmark, ShieldCheck, MessageSquare, 
   CreditCard, Smartphone, Users, 
-  Shield, QrCode, Star, Heart, Users as UsersIcon, Shield as ShieldIcon, Activity
+  Shield, QrCode, Star, Heart, Users as UsersIcon, Shield as ShieldIcon, Activity, Phone
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
-const QRCodeCard = ({ title, description, icon: Icon, imageSrc, color, qrValue }) => (
+const QRCodeCard = ({ title, description, icon: Icon, imageSrc, color, qrValue, phoneInfo }) => (
   <div className={styles.qrCard} style={{ borderColor: color }}>
     {imageSrc ? (
       <div className={styles.iconImageWrapper}>
@@ -26,6 +26,19 @@ const QRCodeCard = ({ title, description, icon: Icon, imageSrc, color, qrValue }
         <div className={styles.qrPlaceholder}>N/A</div>
       )}
     </div>
+    {phoneInfo && (
+      <div className={styles.phoneBadge}>
+        <div className={styles.phoneBadgeLabel}>{phoneInfo.label}</div>
+        <a 
+          href={`tel:${phoneInfo.numberRaw || phoneInfo.number.replace(/\./g, '')}`} 
+          className={styles.phoneBadgeNumber}
+          title="Bấm để gọi điện"
+        >
+          <Phone size={13} style={{ marginRight: '4px' }} />
+          <span>{phoneInfo.number}</span>
+        </a>
+      </div>
+    )}
     <p className={styles.cardDesc}>{description}</p>
   </div>
 );
@@ -97,10 +110,15 @@ const QRCodePage = () => {
           />
           <QRCodeCard 
             title="AN NINH TRẬT TỰ" 
-            description="Số điện thoại trực ban Công an xã và liên hệ bảo đảm ANTT"
+            description="Quét mã tra cứu danh sách Tổ bảo vệ ANTT cơ sở các ấp"
             icon={Shield}
             color="#dc2626"
             qrValue={`${window.location.origin}/an-ninh`}
+            phoneInfo={{
+              label: 'Trực ban Công an xã Châu Thành:',
+              number: '02943.872.064',
+              numberRaw: '02943872064'
+            }}
           />
           <QRCodeCard 
             title="TRA CỨU BẢO HIỂM Y TẾ" 
