@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, Clock, MessageCircle, Phone, Copy, Check, Download, Edit, Trash2, X } from 'lucide-react';
+import { 
+  ArrowLeft, CheckCircle, Clock, MessageCircle, Phone, 
+  Copy, Check, Download, Edit, Trash2, X, Send, RotateCcw, 
+  Building2, AlertCircle
+} from 'lucide-react';
 import styles from './Feedback.module.css';
 
 const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
@@ -25,6 +29,11 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     responseFileUrl: ''
   });
 
+  // Forward Modal State (Chuyển lên Xã)
+  const [forwardModalFeedback, setForwardModalFeedback] = useState(null);
+  const [forwardNote, setForwardNote] = useState('');
+  const [isForwarding, setIsForwarding] = useState(false);
+
   // Edit Modal State (Dành cho Admin)
   const [editingFeedback, setEditingFeedback] = useState(null);
   const [editFormData, setEditFormData] = useState({
@@ -34,7 +43,8 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     hamletId: '',
     content: '',
     status: 'pending',
-    responseNote: ''
+    responseNote: '',
+    forwardNote: ''
   });
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -257,6 +267,89 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     }
   };
 
+  const openForwardModal = (fb) => {
+    setForwardModalFeedback(fb);
+    setForwardNote('Vấn đề vượt quá thẩm quyền giải quyết của Ban nhân dân ấp, kính chuyển UBND xã Châu Thành xem xét chỉ đạo giải quyết.');
+  };
+
+  const closeForwardModal = () => {
+    setForwardModalFeedback(null);
+    setForwardNote('');
+  };
+
+  const submitForward = async (e) => {
+    e.preventDefault();
+    if (!forwardModalFeedback) return;
+    setIsForwarding(true);
+    try {
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${forwardModalFeedback.id}/forward-to-commune`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          forwardNote: forwardNote.trim(),
+          forwardedBy: user.name || 'Ban nhân dân ấp'
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra khi chuyển ý kiến lên xã');
+
+      alert('Đã chuyển tiếp ý kiến lên UBND Xã thành công!');
+      closeForwardModal();
+      
+      // Cập nhật selectedFeedback nếu đang mở
+      if (selectedFeedback && selectedFeedback.id === forwardModalFeedback.id) {
+        setSelectedFeedback(prev => ({
+          ...prev,
+          status: 'forwarded_to_commune',
+          forward_note: forwardNote.trim(),
+          forwarded_at: new Date().toISOString(),
+          forwarded_by: user.name || 'Ban nhân dân ấp'
+        }));
+      }
+
+      fetchFeedbacks();
+      if (refreshUnreadFeedbackCount) {
+        refreshUnreadFeedbackCount();
+      }
+    } catch (err) {
+      alert(err.message || 'Lỗi khi chuyển tiếp ý kiến');
+    } finally {
+      setIsForwarding(false);
+    }
+  };
+
+  const handleRecallForward = async (fb) => {
+    if (!window.confirm(`Bạn có chắc chắn muốn thu hồi kiến nghị của "${fb.name || 'người dân'}" về lại ấp để tự xử lý không?`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${fb.id}/recall-forward`, {
+        method: 'PUT'
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra khi thu hồi');
+
+      alert('Đã thu hồi chuyển tiếp thành công! Ý kiến đã trở về trạng thái Chờ xử lý của ấp.');
+      
+      if (selectedFeedback && selectedFeedback.id === fb.id) {
+        setSelectedFeedback(prev => ({
+          ...prev,
+          status: 'pending',
+          forward_note: null,
+          forwarded_at: null,
+          forwarded_by: null
+        }));
+      }
+
+      fetchFeedbacks();
+      if (refreshUnreadFeedbackCount) {
+        refreshUnreadFeedbackCount();
+      }
+    } catch (err) {
+      alert(err.message || 'Lỗi khi thu hồi chuyển tiếp');
+    }
+  };
+
   const handleDeleteFeedback = async (id, name) => {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa phản ánh của "${name || 'người dân'}" không? Thao tác này sẽ xóa vĩnh viễn dữ liệu.`)) {
       return;
@@ -287,7 +380,8 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       hamletId: fb.hamlet_id || (hamlets[0]?.id || ''),
       content: fb.content || '',
       status: fb.status || 'pending',
-      responseNote: fb.response_note || ''
+      responseNote: fb.response_note || '',
+      forwardNote: fb.forward_note || ''
     });
   };
 
@@ -385,17 +479,56 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                   <td style={{ whiteSpace: 'pre-wrap' }}>{fb.content}</td>
                   <td>
                     {fb.status === 'handled' ? (
-                      <span className={`${styles.badge} ${styles.badgeHandled}`}><CheckCircle size={12} style={{marginRight:4, verticalAlign:'middle'}}/> Đã xử lý</span>
+                      <span className={`${styles.badge} ${styles.badgeHandled}`}>
+                        <CheckCircle size={12} style={{marginRight:4, verticalAlign:'middle'}}/> Đã xử lý
+                      </span>
+                    ) : fb.status === 'forwarded_to_commune' ? (
+                      <span className={`${styles.badge} ${isAdmin ? styles.badgeForwardedAlert : styles.badgeForwarded}`} title={`Đã chuyển tiếp lên UBND Xã (${new Date(fb.forwarded_at || fb.created_at).toLocaleDateString('vi-VN')})`}>
+                        <Send size={12} style={{marginRight:4, verticalAlign:'middle'}}/> 
+                        {isAdmin ? 'Ấp chuyển lên Xã' : 'Đã chuyển lên Xã'}
+                      </span>
                     ) : (
-                      <span className={`${styles.badge} ${styles.badgePending}`}><Clock size={12} style={{marginRight:4, verticalAlign:'middle'}}/> Chờ xử lý</span>
+                      <span className={`${styles.badge} ${styles.badgePending}`}>
+                        <Clock size={12} style={{marginRight:4, verticalAlign:'middle'}}/> Chờ xử lý
+                      </span>
                     )}
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                       {fb.status === 'pending' ? (
-                        <button className={styles.actionBtn} style={{ padding: '5px 10px', fontSize: '13px' }} onClick={() => openHandleView(fb)}>
-                          Xử lý
-                        </button>
+                        <>
+                          <button className={styles.actionBtn} style={{ padding: '5px 10px', fontSize: '13px' }} onClick={() => openHandleView(fb)}>
+                            Xử lý
+                          </button>
+                          {!isAdmin && (
+                            <button 
+                              type="button"
+                              className={styles.forwardBtn} 
+                              style={{ padding: '5px 10px', fontSize: '13px' }} 
+                              onClick={() => openForwardModal(fb)}
+                              title="Trường hợp ấp không xử lý được thì chuyển tiếp lên UBND Xã"
+                            >
+                              <Send size={12} style={{ marginRight: 4 }} /> Chuyển lên Xã
+                            </button>
+                          )}
+                        </>
+                      ) : fb.status === 'forwarded_to_commune' ? (
+                        <>
+                          <button className={styles.secondaryBtn} style={{ margin: 0, padding: '5px 10px', fontSize: '13px' }} onClick={() => openHandleView(fb)}>
+                            {isAdmin ? 'Xử lý kiến nghị' : 'Xem tình trạng'}
+                          </button>
+                          {!isAdmin && (
+                            <button 
+                              type="button"
+                              className={styles.recallBtn} 
+                              style={{ padding: '5px 8px', fontSize: '12px' }} 
+                              onClick={() => handleRecallForward(fb)}
+                              title="Thu hồi để ấp tự xử lý"
+                            >
+                              <RotateCcw size={12} style={{ marginRight: 3 }} /> Thu hồi
+                            </button>
+                          )}
+                        </>
                       ) : (
                         <button className={styles.secondaryBtn} style={{ margin: 0, padding: '5px 10px', fontSize: '13px' }} onClick={() => openHandleView(fb)}>
                           Xem kết quả
@@ -683,48 +816,223 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
             </div>
           )}
         </div>
-      ) : (
-        <form className={styles.form} onSubmit={submitHandle}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Nội dung trả lời / xử lý</label>
-            <textarea 
-              name="responseNote"
-              value={handleData.responseNote}
-              onChange={handleHandleChange}
-              className={styles.textarea} 
-              placeholder="Nhập ghi chú xử lý..."
-              required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Up công văn xử lý (Tùy chọn)</label>
-            <input 
-              type="file" 
-              accept=".pdf,.doc,.docx,.jpg,.png"
-              onChange={handleFileUpload}
-              className={styles.input} 
-            />
-            {handleData.responseFileUrl && <small style={{color:'green'}}>Đã chọn file đính kèm</small>}
-          </div>
-
-          {/* Khung thông báo gửi kết quả qua Zalo */}
-          <div className={styles.sendCard}>
-            <div className={styles.sendCardHeader} style={{ color: '#0068ff' }}>
-              <MessageCircle size={18} /> Kết quả sẽ gửi qua Zalo người dân: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.phone || 'Chưa có SĐT'}</strong>
+      ) : selectedFeedback?.status === 'forwarded_to_commune' && !isAdmin ? (
+        <div className={styles.forwardStatusCard}>
+          <div className={styles.forwardStatusHeader}>
+            <Building2 size={28} color="#4f46e5" />
+            <div>
+              <h3 style={{ margin: 0, color: '#312e81', fontSize: '17px' }}>
+                Ý kiến này đã được chuyển lên Ủy ban nhân dân xã Châu Thành
+              </h3>
+              <p style={{ margin: '6px 0 0', color: '#4b5563', fontSize: '13px' }}>
+                Thời gian chuyển: <strong>{new Date(selectedFeedback.forwarded_at || selectedFeedback.created_at).toLocaleString('vi-VN')}</strong>
+                {selectedFeedback.forwarded_by && <> &bull; Đơn vị chuyển: <strong>{selectedFeedback.forwarded_by}</strong></>}
+              </p>
             </div>
-            <p style={{ margin: '0', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-              Sau khi bấm <strong>Hoàn tất Xử Lý Ý Kiến</strong>, bạn có thể bấm nút <strong>Gửi qua Zalo</strong> để gửi tin nhắn thông báo giải quyết trực tiếp đến người dân (nội dung kết quả đã tự động sao chép, bạn chỉ việc Dán / Ctrl+V và Gửi).
-            </p>
+          </div>
+          
+          <div className={styles.forwardNoteBox}>
+            <strong>Lý do chuyển / Ý kiến đề xuất của Ấp:</strong>
+            <p>{selectedFeedback.forward_note || 'Vấn đề vượt quá thẩm quyền cấp ấp, kính chuyển UBND xã giải quyết.'}</p>
           </div>
 
-          <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
-            {isSubmitting ? 'Đang xử lý...' : 'Hoàn tất Xử Lý Ý Kiến'}
-          </button>
-        </form>
+          <div style={{ marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button 
+              type="button" 
+              className={styles.recallBtn}
+              onClick={() => handleRecallForward(selectedFeedback)}
+            >
+              <RotateCcw size={14} style={{ marginRight: 4 }} /> Thu hồi để ấp tự xử lý
+            </button>
+            <span style={{ fontSize: '13px', color: '#6b7280' }}>
+              (Hiện tại ý kiến đang chờ UBND Xã tiếp nhận và xử lý)
+            </span>
+          </div>
+        </div>
+      ) : (
+        <>
+          {selectedFeedback?.status === 'forwarded_to_commune' && isAdmin && (
+            <div className={styles.forwardAlertCard}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b45309', fontWeight: 'bold', fontSize: '15px', marginBottom: '6px' }}>
+                <AlertCircle size={20} /> Ý KIẾN DO {selectedFeedback.hamlet_name?.toUpperCase() || 'ẤP'} CHUYỂN TIẾP LÊN XÃ
+              </div>
+              <p style={{ margin: '0 0 6px', fontSize: '13px', color: '#78350f' }}>
+                Thời gian chuyển: {new Date(selectedFeedback.forwarded_at || selectedFeedback.created_at).toLocaleString('vi-VN')}
+                {selectedFeedback.forwarded_by && ` (Người chuyển: ${selectedFeedback.forwarded_by})`}
+              </p>
+              <div style={{ background: '#fffbeb', border: '1px solid #fde68a', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', color: '#92400e' }}>
+                <strong>Lý do chuyển của Ấp:</strong> {selectedFeedback.forward_note || 'Vấn đề vượt quá thẩm quyền cấp ấp, kính chuyển UBND xã giải quyết.'}
+              </div>
+            </div>
+          )}
+
+          {!isAdmin && selectedFeedback?.status === 'pending' && (
+            <div className={styles.forwardSectionCard}>
+              <div className={styles.forwardSectionHeader}>
+                <Building2 size={24} color="#4f46e5" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div>
+                  <h4 style={{ margin: 0, color: '#312e81', fontSize: '15px' }}>
+                    Trường hợp ấp không xử lý được (vượt thẩm quyền):
+                  </h4>
+                  <p style={{ margin: '4px 0 0', color: '#4b5563', fontSize: '13px', lineHeight: 1.5 }}>
+                    Nếu nội dung kiến nghị vượt quá thẩm quyền của ấp hoặc cần UBND Xã và các ngành chuyên môn trực tiếp chỉ đạo, giải quyết, bạn có thể chuyển tiếp lên xã.
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className={styles.forwardActionBtn}
+                onClick={() => openForwardModal(selectedFeedback)}
+              >
+                <Send size={15} style={{ marginRight: 6 }} /> Chuyển Lên Ủy Ban Nhân Dân Xã
+              </button>
+            </div>
+          )}
+
+          <form className={styles.form} onSubmit={submitHandle}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                {isAdmin && selectedFeedback?.status === 'forwarded_to_commune' 
+                  ? 'UBND Xã trả lời / xử lý kiến nghị của người dân' 
+                  : 'Nội dung trả lời / xử lý của Ấp'}
+              </label>
+              <textarea 
+                name="responseNote"
+                value={handleData.responseNote}
+                onChange={handleHandleChange}
+                className={styles.textarea} 
+                placeholder="Nhập ghi chú xử lý..."
+                required
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Up công văn xử lý (Tùy chọn)</label>
+              <input 
+                type="file" 
+                accept=".pdf,.doc,.docx,.jpg,.png"
+                onChange={handleFileUpload}
+                className={styles.input} 
+              />
+              {handleData.responseFileUrl && <small style={{color:'green'}}>Đã chọn file đính kèm</small>}
+            </div>
+
+            {/* Khung thông báo gửi kết quả qua Zalo */}
+            <div className={styles.sendCard}>
+              <div className={styles.sendCardHeader} style={{ color: '#0068ff' }}>
+                <MessageCircle size={18} /> Kết quả sẽ gửi qua Zalo người dân: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.phone || 'Chưa có SĐT'}</strong>
+              </div>
+              <p style={{ margin: '0', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+                Sau khi bấm <strong>Hoàn tất Xử Lý Ý Kiến</strong>, bạn có thể bấm nút <strong>Gửi qua Zalo</strong> để gửi tin nhắn thông báo giải quyết trực tiếp đến người dân (nội dung kết quả đã tự động sao chép, bạn chỉ việc Dán / Ctrl+V và Gửi).
+              </p>
+            </div>
+
+            <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
+              {isSubmitting ? 'Đang xử lý...' : 'Hoàn tất Xử Lý Ý Kiến'}
+            </button>
+          </form>
+        </>
       )}
     </>
   );
+
+  const renderForwardModal = () => {
+    if (!forwardModalFeedback) return null;
+    
+    const quickTemplates = [
+      "Vấn đề vượt quá thẩm quyền giải quyết của Ban nhân dân ấp, kính chuyển UBND xã xem xét chỉ đạo giải quyết.",
+      "Nội dung liên quan đến quy hoạch đất đai / xây dựng, kính đề nghị UBND xã và bộ phận chuyên môn kiểm tra xử lý.",
+      "Tranh chấp, khiếu nại phức tạp giữa các bên, kính chuyển UBND xã giải quyết theo thẩm quyền.",
+      "Cần hỗ trợ kinh phí hoặc đầu tư hạ tầng vượt khả năng của ấp, kính trình UBND xã."
+    ];
+
+    return (
+      <div className={styles.modalOverlay} onClick={closeForwardModal}>
+        <div className={styles.modalContent} onClick={e => e.stopPropagation()} style={{ maxWidth: '580px' }}>
+          <div className={styles.modalHeader} style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1e3c72' }}>
+              <Building2 size={20} color="#4338ca" />
+              <h3 className={styles.modalTitle} style={{ margin: 0, fontSize: '17px' }}>
+                Chuyển Ý Kiến Lên Ủy Ban Nhân Dân Xã
+              </h3>
+            </div>
+            <button type="button" className={styles.closeBtn} onClick={closeForwardModal}>
+              <X size={20} />
+            </button>
+          </div>
+          
+          <form onSubmit={submitForward}>
+            <div className={styles.modalBody}>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '12px', marginBottom: '16px' }}>
+                <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '4px' }}>
+                  Người gửi: <strong style={{ color: '#1e293b' }}>{forwardModalFeedback.name}</strong> ({forwardModalFeedback.phone})
+                </div>
+                <div style={{ fontSize: '13px', color: '#334155', fontStyle: 'italic', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  "{forwardModalFeedback.content}"
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Lý do / Ý kiến đề xuất của Ấp khi chuyển lên Xã <span style={{ color: 'red' }}>*</span>
+                </label>
+                <textarea 
+                  rows={4}
+                  value={forwardNote}
+                  onChange={(e) => setForwardNote(e.target.value)}
+                  className={styles.textarea}
+                  placeholder="Nhập lý do chuyển tiếp hoặc ý kiến đề xuất giải quyết..."
+                  required
+                />
+              </div>
+
+              <div style={{ marginTop: '10px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '6px' }}>
+                  Chọn nhanh lý do mẫu:
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {quickTemplates.map((tpl, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      style={{
+                        background: '#f1f5f9',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '4px',
+                        padding: '4px 8px',
+                        fontSize: '11.5px',
+                        color: '#334155',
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                      onClick={() => setForwardNote(tpl)}
+                    >
+                      {tpl}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button type="button" className={styles.secondaryBtn} onClick={closeForwardModal} style={{ margin: 0 }}>
+                Hủy bỏ
+              </button>
+              <button 
+                type="submit" 
+                className={styles.forwardActionBtn}
+                disabled={isForwarding || !forwardNote.trim()}
+                style={{ margin: 0 }}
+              >
+                <Send size={15} style={{ marginRight: 6 }} />
+                {isForwarding ? 'Đang chuyển...' : 'Xác Nhận Chuyển Lên UBND Xã'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
 
   const renderEditModal = () => {
     if (!editingFeedback) return null;
@@ -810,9 +1118,24 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                   className={styles.select}
                 >
                   <option value="pending">Chờ xử lý</option>
+                  <option value="forwarded_to_commune">Đã chuyển lên Xã</option>
                   <option value="handled">Đã xử lý</option>
                 </select>
               </div>
+
+              {editFormData.status === 'forwarded_to_commune' && (
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Lý do / Ý kiến đề xuất của Ấp khi chuyển lên Xã</label>
+                  <textarea 
+                    name="forwardNote" 
+                    value={editFormData.forwardNote || ''} 
+                    onChange={handleEditChange} 
+                    className={styles.textarea} 
+                    placeholder="Nhập lý do chuyển lên xã..."
+                    style={{ minHeight: '60px' }}
+                  />
+                </div>
+              )}
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>Nội dung trả lời / giải quyết</label>
@@ -847,6 +1170,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       {viewMode === 'form' && renderForm()}
       {viewMode === 'handle' && renderHandle()}
       {renderEditModal()}
+      {renderForwardModal()}
     </div>
   );
 };

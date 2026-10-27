@@ -19,8 +19,18 @@ const pool = new Pool({
 });
 // Kiểm tra kết nối CSDL khi khởi động
 pool.connect()
-  .then(client => {
+  .then(async client => {
     console.log("Đã kết nối tới PostgreSQL (database KhoXaAp) thành công!");
+    try {
+      await client.query(`
+        ALTER TABLE citizen_feedbacks
+        ADD COLUMN IF NOT EXISTS forward_note TEXT,
+        ADD COLUMN IF NOT EXISTS forwarded_at TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS forwarded_by VARCHAR(255);
+      `);
+    } catch (e) {
+      console.log("Columns check:", e.message);
+    }
     client.release();
   })
   .catch(err => {
@@ -475,16 +485,18 @@ app.get('/api/feedbacks/unread-count', async (req, res) => {
   const { userId, role } = req.query;
 
   try {
-    let query = `SELECT COUNT(*) as count FROM citizen_feedbacks WHERE status = 'pending'`;
+    let query = '';
     let params = [];
 
     if (role === 'user') {
-      query += ` AND hamlet_id = $1`;
+      query = `SELECT COUNT(*) as count FROM citizen_feedbacks WHERE status = 'pending' AND hamlet_id = $1`;
       params.push(userId);
+    } else {
+      query = `SELECT COUNT(*) as count FROM citizen_feedbacks WHERE status IN ('pending', 'forwarded_to_commune')`;
     }
 
     const { rows } = await pool.query(query, params);
-    res.json({ unreadCount: parseInt(rows[0].count) });
+    res.json({ unreadCount: parseInt(rows[0].count) || 0 });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -521,6 +533,59 @@ app.put('/api/feedbacks/:id/handle', async (req, res) => {
     }
 
     res.json({ message: 'Đã xử lý ý kiến và gửi email thông báo thành công' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API 5.2.1: Chuyển ý kiến lên UBND Xã (khi ấp không xử lý được)
+app.put('/api/feedbacks/:id/forward-to-commune', async (req, res) => {
+  const { id } = req.params;
+  const { forwardNote, forwardedBy } = req.body;
+
+  try {
+    const { rows } = await pool.query(
+      `UPDATE citizen_feedbacks 
+       SET status = 'forwarded_to_commune',
+           forward_note = $1,
+           forwarded_at = CURRENT_TIMESTAMP,
+           forwarded_by = $2
+       WHERE id = $3
+       RETURNING *`,
+      [forwardNote || 'Chuyển tiếp lên UBND Xã do vượt thẩm quyền giải quyết của ấp', forwardedBy || 'Ban nhân dân ấp', id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Không tìm thấy ý kiến để chuyển tiếp' });
+    }
+
+    res.json({ message: 'Đã chuyển tiếp ý kiến lên UBND Xã thành công', feedback: rows[0] });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API 5.2.2: Thu hồi chuyển tiếp (để ấp tự xử lý lại)
+app.put('/api/feedbacks/:id/recall-forward', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { rows } = await pool.query(
+      `UPDATE citizen_feedbacks 
+       SET status = 'pending',
+           forward_note = NULL,
+           forwarded_at = NULL,
+           forwarded_by = NULL
+       WHERE id = $1 AND status = 'forwarded_to_commune'
+       RETURNING *`,
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ error: 'Không thể thu hồi hoặc ý kiến đã được xử lý' });
+    }
+
+    res.json({ message: 'Đã thu hồi chuyển tiếp thành công', feedback: rows[0] });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
