@@ -100,7 +100,21 @@ async function initDb() {
       );
     }
 
-    console.log("Khởi tạo cơ sở dữ liệu thành công! Đã thêm tài khoản Admin và 20 Ấp (Mật khẩu mặc định: 123456).");
+    // Tạo 4 Phòng ban chuyên môn
+    const departments = [
+      { username: 'phongvanhoaxahoi', name: 'Phòng Văn hóa - Xã hội' },
+      { username: 'phongkinhte', name: 'Phòng Kinh tế' },
+      { username: 'vanphonghdndubnd', name: 'Văn phòng HĐND và UBND' },
+      { username: 'hanhchinhcong', name: 'Trung tâm Phục vụ Hành chính công' }
+    ];
+    for (const dept of departments) {
+      await client.query(
+        "INSERT INTO users (username, password, role, name) VALUES ($1, $2, $3, $4)",
+        [dept.username, hashPassword, 'department', dept.name]
+      );
+    }
+
+    console.log("Khởi tạo cơ sở dữ liệu thành công! Đã thêm tài khoản Admin, 20 Ấp và 4 Phòng ban chuyên môn (Mật khẩu mặc định: 123456).");
   } catch (error) {
     console.error("Lỗi khi khởi tạo CSDL:", error);
   } finally {

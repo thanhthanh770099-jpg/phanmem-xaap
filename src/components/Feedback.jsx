@@ -15,6 +15,7 @@ export const DEPARTMENTS = [
 
 const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const isAdmin = user?.role === 'admin' || user?.role === 'ubnd';
+  const isDepartment = user?.role === 'department';
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'form' | 'handle'
   const [feedbacks, setFeedbacks] = useState([]);
   const [hamlets, setHamlets] = useState([]);
@@ -507,7 +508,9 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       <>
         <div className={styles.header}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-            <h2 className={styles.title}>Danh Sách Ý Kiến, Kiến Nghị</h2>
+            <h2 className={styles.title}>
+              {isDepartment ? `Ý Kiến Phản Ánh Chuyển Đến ${user.name}` : 'Danh Sách Ý Kiến, Kiến Nghị'}
+            </h2>
             {isAdmin && (
               <select
                 value={filterDepartment}
@@ -596,7 +599,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                           <button className={styles.actionBtn} style={{ padding: '5px 10px', fontSize: '13px' }} onClick={() => openHandleView(fb)}>
                             Xử lý
                           </button>
-                          {!isAdmin && (
+                          {!isAdmin && !isDepartment && (
                             <button 
                               type="button"
                               className={styles.forwardBtn} 
@@ -611,9 +614,9 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                       ) : fb.status === 'forwarded_to_commune' ? (
                         <>
                           <button className={styles.secondaryBtn} style={{ margin: 0, padding: '5px 10px', fontSize: '13px' }} onClick={() => openHandleView(fb)}>
-                            {isAdmin ? 'Xử lý kiến nghị' : 'Xem tình trạng'}
+                            {(isAdmin || isDepartment) ? 'Xử lý kiến nghị' : 'Xem tình trạng'}
                           </button>
-                          {!isAdmin && (
+                          {!isAdmin && !isDepartment && (
                             <button 
                               type="button"
                               className={styles.recallBtn} 
@@ -913,7 +916,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
             </div>
           )}
         </div>
-      ) : selectedFeedback?.status === 'forwarded_to_commune' && !isAdmin ? (
+      ) : selectedFeedback?.status === 'forwarded_to_commune' && !isAdmin && !isDepartment ? (
         <div className={styles.forwardStatusCard}>
           <div className={styles.forwardStatusHeader}>
             <Building2 size={28} color="#4f46e5" />
@@ -955,7 +958,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
         </div>
       ) : (
         <>
-          {selectedFeedback?.status === 'forwarded_to_commune' && isAdmin && (
+          {selectedFeedback?.status === 'forwarded_to_commune' && (isAdmin || isDepartment) && (
             <div className={styles.forwardAlertCard}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#b45309', fontWeight: 'bold', fontSize: '15px', marginBottom: '6px' }}>
                 <AlertCircle size={20} /> Ý KIẾN DO {selectedFeedback.hamlet_name?.toUpperCase() || 'ẤP'} CHUYỂN TIẾP LÊN XÃ
@@ -966,6 +969,29 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
               </p>
               <div style={{ background: '#fffbeb', border: '1px solid #fde68a', padding: '10px 12px', borderRadius: '6px', fontSize: '13px', color: '#92400e' }}>
                 <strong>Lý do chuyển của Ấp:</strong> {selectedFeedback.forward_note || 'Vấn đề vượt quá thẩm quyền cấp ấp, kính chuyển UBND xã giải quyết.'}
+              </div>
+            </div>
+          )}
+
+          {isDepartment && (
+            <div className={styles.assignedDeptBox} style={{ marginBottom: '20px' }}>
+              <div className={styles.assignedDeptInfo}>
+                <Building2 size={24} color="#16a34a" />
+                <div>
+                  <div>
+                    Đơn vị chuyên môn phụ trách: <strong style={{ color: '#15803d', fontSize: '15px' }}>{selectedFeedback.target_department || user.name}</strong>
+                  </div>
+                  {selectedFeedback.department_note && (
+                    <div style={{ fontSize: '13px', color: '#475569', fontWeight: 'normal', marginTop: '3px' }}>
+                      Ghi chú phân công của UBND Xã: <em>"{selectedFeedback.department_note}"</em>
+                    </div>
+                  )}
+                  {selectedFeedback.department_assigned_at && (
+                    <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 'normal', marginTop: '2px' }}>
+                      Thời gian chuyển: {new Date(selectedFeedback.department_assigned_at).toLocaleString('vi-VN')}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -1070,7 +1096,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
             </>
           )}
 
-          {!isAdmin && selectedFeedback?.status === 'pending' && (
+          {!isAdmin && !isDepartment && selectedFeedback?.status === 'pending' && (
             <div className={styles.forwardSectionCard}>
               <div className={styles.forwardSectionHeader}>
                 <Building2 size={24} color="#4f46e5" style={{ flexShrink: 0, marginTop: '2px' }} />
@@ -1096,9 +1122,11 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           <form className={styles.form} onSubmit={submitHandle}>
             <div className={styles.formGroup}>
               <label className={styles.label}>
-                {isAdmin && selectedFeedback?.status === 'forwarded_to_commune' 
-                  ? 'UBND Xã trả lời / xử lý kiến nghị của người dân' 
-                  : 'Nội dung trả lời / xử lý của Ấp'}
+                {isDepartment 
+                  ? `${user.name} trả lời / xử lý kiến nghị của người dân`
+                  : isAdmin && selectedFeedback?.status === 'forwarded_to_commune' 
+                    ? 'UBND Xã trả lời / xử lý kiến nghị của người dân' 
+                    : 'Nội dung trả lời / xử lý của Ấp'}
               </label>
               <textarea 
                 name="responseNote"

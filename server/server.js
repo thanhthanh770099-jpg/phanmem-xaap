@@ -49,7 +49,15 @@ app.post('/api/auth/login', async (req, res) => {
   }
 
   try {
-    const { rows } = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    const rawUsername = username.trim().toLowerCase();
+    // Hỗ trợ alias tiện lợi cho các phòng ban chuyên môn
+    let mappedUsername = rawUsername;
+    if (rawUsername === 'vanhoaxahoi' || rawUsername === 'pvhxh') mappedUsername = 'phongvanhoaxahoi';
+    else if (rawUsername === 'kinhte' || rawUsername === 'pkt') mappedUsername = 'phongkinhte';
+    else if (rawUsername === 'vanphongubnd' || rawUsername === 'vphdndubnd' || rawUsername === 'vpubnd') mappedUsername = 'vanphonghdndubnd';
+    else if (rawUsername === 'trungtamhcc' || rawUsername === 'tthcc' || rawUsername === 'ttphucvuhanhchinhcong') mappedUsername = 'hanhchinhcong';
+
+    const { rows } = await pool.query('SELECT * FROM users WHERE LOWER(username) = $1', [mappedUsername]);
 
     if (rows.length === 0) return res.status(401).json({ error: 'Tài khoản không tồn tại' });
 
@@ -472,6 +480,9 @@ app.get('/api/feedbacks', async (req, res) => {
     if (role === 'user') {
       query += ` WHERE f.hamlet_id = $1 `;
       params.push(userId);
+    } else if (role === 'department') {
+      query += ` WHERE f.target_department = (SELECT name FROM users WHERE id = $1) `;
+      params.push(userId);
     }
 
     query += ` ORDER BY f.created_at DESC`;
@@ -493,6 +504,9 @@ app.get('/api/feedbacks/unread-count', async (req, res) => {
 
     if (role === 'user') {
       query = `SELECT COUNT(*) as count FROM citizen_feedbacks WHERE status = 'pending' AND hamlet_id = $1`;
+      params.push(userId);
+    } else if (role === 'department') {
+      query = `SELECT COUNT(*) as count FROM citizen_feedbacks WHERE status != 'handled' AND target_department = (SELECT name FROM users WHERE id = $1)`;
       params.push(userId);
     } else {
       query = `SELECT COUNT(*) as count FROM citizen_feedbacks WHERE status IN ('pending', 'forwarded_to_commune')`;
