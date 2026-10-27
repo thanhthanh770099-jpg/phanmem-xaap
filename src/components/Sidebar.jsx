@@ -3,11 +3,16 @@ import styles from './Sidebar.module.css';
 import { ChevronRight } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, unreadDocCount, unreadFeedbackCount, user }) => {
+  const isCommune = user?.role === 'admin' || user?.role === 'ubnd' || user?.role === 'department';
+
   const menuItems = [
     { id: 1, title: 'Quản lý văn bản', isNew: false },
     { id: 2, title: 'Tiếp nhận và xử lý ý kiến của người dân', isNew: false },
-    { id: 3, title: 'Mô hình Ấp Thông Minh', isNew: true },
   ];
+
+  if (isCommune) {
+    menuItems.push({ id: 3, title: 'Mô hình Ấp Thông Minh', isNew: true });
+  }
 
   if (user?.role === 'admin') {
     menuItems.push({ id: 6, title: 'Quản lý tài khoản', isNew: false });
@@ -16,13 +21,13 @@ const Sidebar = ({ activeTab, setActiveTab, unreadDocCount, unreadFeedbackCount,
   return (
     <aside className={styles.sidebar}>
       <ul className={styles.menuList}>
-        {menuItems.map((item) => (
+        {menuItems.map((item, index) => (
           <li 
             key={item.id} 
             className={`${styles.menuItem} ${activeTab === item.id ? styles.active : ''}`}
             onClick={() => setActiveTab(item.id)}
           >
-            <div className={styles.numberCircle}>{item.id}</div>
+            <div className={styles.numberCircle}>{index + 1}</div>
             <span className={styles.title}>{item.title}</span>
             {item.isNew && <span className={styles.newBadge}>Mới</span>}
             {item.id === 1 && unreadDocCount > 0 && <span className={styles.newBadge}>{unreadDocCount}</span>}

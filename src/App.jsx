@@ -94,6 +94,8 @@ function App() {
     return <Login onLoginSuccess={(userData) => setUser(userData)} />;
   }
 
+  const isCommune = user?.role === 'admin' || user?.role === 'ubnd' || user?.role === 'department';
+
   return (
     <>
       <Header user={user} onLogout={handleLogout} setActiveTab={setActiveTab} />
@@ -102,9 +104,9 @@ function App() {
         <div style={{ flex: 1, overflowY: 'auto', backgroundColor: '#f4f7f6' }}>
           {activeTab === 1 ? <DocumentManager user={user} unreadDocCount={unreadDocCount} refreshUnreadCount={fetchUnreadCount} />
             : activeTab === 2 ? <Feedback user={user} refreshUnreadFeedbackCount={fetchUnreadFeedbackCount} />
-              : activeTab === 3 ? <QRCodePage />
+              : (activeTab === 3 && isCommune) ? <QRCodePage />
                 : activeTab === 4 ? <Profile user={user} onUserUpdate={handleUserUpdate} />
-                  : activeTab === 6 ? <UserManagement user={user} />
+                  : (activeTab === 6 && user?.role === 'admin') ? <UserManagement user={user} />
                     : <Dashboard />}
         </div>
       </div>
