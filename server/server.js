@@ -732,6 +732,196 @@ app.put('/api/feedbacks/:id', async (req, res) => {
   }
 });
 
+// API 6: Báo cáo, thống kê chi tiết theo Ấp và Xuất Excel
+app.get('/api/reports/hamlet-stats', async (req, res) => {
+  const { hamletId, startDate, endDate } = req.query;
+
+  try {
+    let queryParams = [];
+    let docFilter = '';
+    let fbFilter = '';
+
+    if (startDate) {
+      queryParams.push(startDate);
+      docFilter += ` AND d.created_at >= $${queryParams.length}`;
+      fbFilter += ` AND f.created_at >= $${queryParams.length}`;
+    }
+    if (endDate) {
+      queryParams.push(endDate);
+      docFilter += ` AND d.created_at <= ($${queryParams.length}::date + interval '1 day')`;
+      fbFilter += ` AND f.created_at <= ($${queryParams.length}::date + interval '1 day')`;
+    }
+
+    let hamletFilter = "WHERE u.role = 'user'";
+    if (hamletId && hamletId !== 'ALL') {
+      queryParams.push(hamletId);
+      hamletFilter += ` AND u.id = $${queryParams.length}`;
+    }
+
+    const statsQuery = `
+      SELECT 
+        u.id as "hamletId",
+        u.name as "hamletName",
+        COALESCE(doc_stats.total_docs, 0)::int as "totalDocs",
+        COALESCE(doc_stats.completed_docs, 0)::int as "completedDocs",
+        COALESCE(doc_stats.read_docs, 0)::int as "readDocs",
+        COALESCE(doc_stats.unread_docs, 0)::int as "unreadDocs",
+        COALESCE(fb_stats.total_feedbacks, 0)::int as "totalFeedbacks",
+        COALESCE(fb_stats.handled_feedbacks, 0)::int as "handledFeedbacks",
+        COALESCE(fb_stats.pending_feedbacks, 0)::int as "pendingFeedbacks",
+        COALESCE(fb_stats.forwarded_feedbacks, 0)::int as "forwardedFeedbacks"
+      FROM users u
+      LEFT JOIN (
+        SELECT 
+          dr.recipient_id,
+          COUNT(dr.id) as total_docs,
+          COUNT(CASE WHEN dr.status = 'completed' THEN 1 END) as completed_docs,
+          COUNT(CASE WHEN dr.status = 'read' THEN 1 END) as read_docs,
+          COUNT(CASE WHEN dr.status = 'unread' THEN 1 END) as unread_docs
+        FROM document_recipients dr
+        JOIN documents d ON dr.document_id = d.id
+        WHERE 1=1 ${docFilter}
+        GROUP BY dr.recipient_id
+      ) doc_stats ON doc_stats.recipient_id = u.id
+      LEFT JOIN (
+        SELECT 
+          f.hamlet_id,
+          COUNT(f.id) as total_feedbacks,
+          COUNT(CASE WHEN f.status = 'handled' THEN 1 END) as handled_feedbacks,
+          COUNT(CASE WHEN f.status = 'pending' THEN 1 END) as pending_feedbacks,
+          COUNT(CASE WHEN f.status = 'forwarded_to_commune' THEN 1 END) as forwarded_feedbacks
+        FROM citizen_feedbacks f
+        WHERE 1=1 ${fbFilter}
+        GROUP BY f.hamlet_id
+      ) fb_stats ON fb_stats.hamlet_id = u.id
+      ${hamletFilter}
+      ORDER BY u.id ASC
+    `;
+
+    const { rows: hamletRows } = await pool.query(statsQuery, queryParams);
+
+    const hamletStats = hamletRows.map(r => {
+      const docProgress = r.totalDocs > 0 ? Math.round((r.completedDocs / r.totalDocs) * 100) : 100;
+      const feedbackProgress = r.totalFeedbacks > 0 ? Math.round((r.handledFeedbacks / r.totalFeedbacks) * 100) : 100;
+      const avgScore = Math.round((docProgress + feedbackProgress) / 2);
+      let rating = 'Xuất sắc';
+      if (avgScore >= 90) rating = 'Xuất sắc';
+      else if (avgScore >= 75) rating = 'Tốt';
+      else if (avgScore >= 50) rating = 'Khá';
+      else rating = 'Cần đôn đốc';
+
+      return {
+        ...r,
+        docProgress,
+        feedbackProgress,
+        avgScore,
+        rating
+      };
+    });
+
+    // Detailed documents
+    let docDetailQuery = `
+      SELECT 
+        d.id, d.number, d.summary, d.file_url, d.created_at,
+        u_sender.name as sender_name,
+        dr.recipient_id as hamlet_id,
+        u_rec.name as hamlet_name,
+        dr.status,
+        dr.read_at
+      FROM documents d
+      JOIN document_recipients dr ON d.id = dr.document_id
+      JOIN users u_rec ON dr.recipient_id = u_rec.id
+      LEFT JOIN users u_sender ON d.sender_id = u_sender.id
+      WHERE u_rec.role = 'user'
+    `;
+    let docDetailParams = [];
+    if (hamletId && hamletId !== 'ALL') {
+      docDetailParams.push(hamletId);
+      docDetailQuery += ` AND dr.recipient_id = $${docDetailParams.length}`;
+    }
+    if (startDate) {
+      docDetailParams.push(startDate);
+      docDetailQuery += ` AND d.created_at >= $${docDetailParams.length}`;
+    }
+    if (endDate) {
+      docDetailParams.push(endDate);
+      docDetailQuery += ` AND d.created_at <= ($${docDetailParams.length}::date + interval '1 day')`;
+    }
+    docDetailQuery += ` ORDER BY d.created_at DESC, d.id DESC`;
+
+    const { rows: documentDetails } = await pool.query(docDetailQuery, docDetailParams);
+
+    // Detailed feedbacks
+    let fbDetailQuery = `
+      SELECT 
+        f.id, f.name, f.phone, f.email, f.content, f.image_url,
+        f.status, f.response_note, f.response_file_url, f.handled_at,
+        f.forward_note, f.forwarded_at, f.target_department,
+        f.created_at,
+        f.hamlet_id,
+        u.name as hamlet_name
+      FROM citizen_feedbacks f
+      LEFT JOIN users u ON f.hamlet_id = u.id
+      WHERE 1=1
+    `;
+    let fbDetailParams = [];
+    if (hamletId && hamletId !== 'ALL') {
+      fbDetailParams.push(hamletId);
+      fbDetailQuery += ` AND f.hamlet_id = $${fbDetailParams.length}`;
+    }
+    if (startDate) {
+      fbDetailParams.push(startDate);
+      fbDetailQuery += ` AND f.created_at >= $${fbDetailParams.length}`;
+    }
+    if (endDate) {
+      fbDetailParams.push(endDate);
+      fbDetailQuery += ` AND f.created_at <= ($${fbDetailParams.length}::date + interval '1 day')`;
+    }
+    fbDetailQuery += ` ORDER BY f.created_at DESC`;
+
+    const { rows: feedbackDetails } = await pool.query(fbDetailQuery, fbDetailParams);
+
+    // Aggregate summary metrics
+    const totalHamlets = hamletStats.length;
+    const totalDocsAssigned = hamletStats.reduce((sum, h) => sum + h.totalDocs, 0);
+    const totalDocsCompleted = hamletStats.reduce((sum, h) => sum + h.completedDocs, 0);
+    const totalDocsRead = hamletStats.reduce((sum, h) => sum + h.readDocs, 0);
+    const totalDocsUnread = hamletStats.reduce((sum, h) => sum + h.unreadDocs, 0);
+    const avgDocProgress = totalDocsAssigned > 0 ? Math.round((totalDocsCompleted / totalDocsAssigned) * 100) : 100;
+
+    const totalFeedbacks = hamletStats.reduce((sum, h) => sum + h.totalFeedbacks, 0);
+    const totalFeedbacksHandled = hamletStats.reduce((sum, h) => sum + h.handledFeedbacks, 0);
+    const totalFeedbacksPending = hamletStats.reduce((sum, h) => sum + h.pendingFeedbacks, 0);
+    const totalFeedbacksForwarded = hamletStats.reduce((sum, h) => sum + h.forwardedFeedbacks, 0);
+    const avgFeedbackProgress = totalFeedbacks > 0 ? Math.round((totalFeedbacksHandled / totalFeedbacks) * 100) : 100;
+
+    const summary = {
+      totalHamlets,
+      totalDocsAssigned,
+      totalDocsCompleted,
+      totalDocsRead,
+      totalDocsUnread,
+      avgDocProgress,
+      totalFeedbacks,
+      totalFeedbacksHandled,
+      totalFeedbacksPending,
+      totalFeedbacksForwarded,
+      avgFeedbackProgress,
+      overallScore: Math.round((avgDocProgress + avgFeedbackProgress) / 2)
+    };
+
+    res.json({
+      summary,
+      hamletStats,
+      documents: documentDetails,
+      feedbacks: feedbackDetails
+    });
+  } catch (error) {
+    console.error('Lỗi khi lấy dữ liệu báo cáo thống kê:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Backend server đang chạy tại http://localhost:${port}`);
 });

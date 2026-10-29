@@ -14,6 +14,8 @@ const Sidebar = ({ activeTab, setActiveTab, unreadDocCount, unreadFeedbackCount,
     menuItems.push({ id: 3, title: 'Mô hình Ấp Thông Minh', isNew: true });
   }
 
+  menuItems.push({ id: 5, title: 'Báo cáo, thống kê theo ấp', isNew: true });
+
   if (user?.role === 'admin') {
     menuItems.push({ id: 6, title: 'Quản lý tài khoản', isNew: false });
   }

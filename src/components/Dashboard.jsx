@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Dashboard.module.css';
-import { FileText, Users, CheckCircle, Clock } from 'lucide-react';
+import { FileText, Users, CheckCircle, Clock, FileSpreadsheet } from 'lucide-react';
 
 const StatCard = ({ title, value, icon, color }) => (
   <div className={styles.statCard}>
@@ -14,7 +14,7 @@ const StatCard = ({ title, value, icon, color }) => (
   </div>
 );
 
-const Dashboard = () => {
+const Dashboard = ({ setActiveTab }) => {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
@@ -28,9 +28,33 @@ const Dashboard = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      <div className={styles.headerArea}>
-        <h2>Tổng quan tiến độ thực hiện công việc Xã - Ấp</h2>
-        <p className={styles.subtitle}>Cập nhật mới nhất: Hôm nay</p>
+      <div className={styles.headerArea} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <div>
+          <h2>Tổng quan tiến độ thực hiện công việc Xã - Ấp</h2>
+          <p className={styles.subtitle}>Cập nhật mới nhất: Hôm nay</p>
+        </div>
+        {setActiveTab && (
+          <button 
+            onClick={() => setActiveTab(5)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: '#059669',
+              color: 'white',
+              padding: '10px 18px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
+              border: 'none'
+            }}
+            title="Mở Báo cáo, thống kê chi tiết theo Ấp và Xuất dữ liệu Excel"
+          >
+            <FileSpreadsheet size={16} /> Báo cáo chi tiết & Xuất Excel
+          </button>
+        )}
       </div>
 
       <div className={styles.statsGrid}>

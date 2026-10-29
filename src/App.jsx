@@ -16,6 +16,7 @@ import PaymentGuide from './components/PaymentGuide';
 import VneidGuide from './components/VneidGuide';
 import SmartVinhLongGuide from './components/SmartVinhLongGuide';
 import TraCuuBHYTGuide from './components/TraCuuBHYTGuide';
+import HamletReports from './components/HamletReports';
 
 function App() {
   const [activeTab, setActiveTab] = useState(0); // 0 = Dashboard
@@ -106,8 +107,9 @@ function App() {
             : activeTab === 2 ? <Feedback user={user} refreshUnreadFeedbackCount={fetchUnreadFeedbackCount} />
               : (activeTab === 3 && isCommune) ? <QRCodePage />
                 : activeTab === 4 ? <Profile user={user} onUserUpdate={handleUserUpdate} />
-                  : (activeTab === 6 && user?.role === 'admin') ? <UserManagement user={user} />
-                    : <Dashboard />}
+                  : activeTab === 5 ? <HamletReports user={user} />
+                    : (activeTab === 6 && user?.role === 'admin') ? <UserManagement user={user} />
+                      : <Dashboard setActiveTab={setActiveTab} />}
         </div>
       </div>
     </>
