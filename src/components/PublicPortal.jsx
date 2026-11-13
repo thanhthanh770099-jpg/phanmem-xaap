@@ -62,7 +62,7 @@ const ClickableQRCodeCard = ({ title, description, icon: Icon, imageSrc, color, 
           </a>
         </div>
       )}
-      <p className={styles.cardDesc}>{description}</p>
+      {description && <p className={styles.cardDesc}>{description}</p>}
     </div>
   );
 };
@@ -101,8 +101,7 @@ const PublicPortal = () => {
             isExternal={true}
           />
           <ClickableQRCodeCard
-            title="ỨNG DỤNG ĐỊNH DANH ĐIỆN TỬ (VNeID)"
-            description="Đăng ký, đăng nhập, sử dụng các tiện ích trên VNeID"
+            title="HƯỚNG DẪN TÍCH HỢP 13 LOẠI GIẤY TỜ TRÊN VNeID"
             imageSrc="/images/vneid.png"
             color="#16a34a"
             qrValue="https://drive.google.com/drive/folders/1XxOD_vUWCmBbo30yMBNJknf3UY6S-im7?usp=sharing"
