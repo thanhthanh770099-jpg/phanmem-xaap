@@ -75,6 +75,7 @@ const QRCodePage = () => {
           />
           <QRCodeCard 
             title="HƯỚNG DẪN TÍCH HỢP 13 LOẠI GIẤY TỜ TRÊN VNeID" 
+            description="Hướng dẫn từng bước tích hợp giấy tờ cá nhân lên ứng dụng VNeID, dễ làm, làm được ngay."
             imageSrc="/images/vneid.png"
             color="#16a34a"
             qrValue="https://drive.google.com/drive/folders/1XxOD_vUWCmBbo30yMBNJknf3UY6S-im7?usp=sharing"
