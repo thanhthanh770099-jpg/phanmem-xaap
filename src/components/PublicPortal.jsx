@@ -1,8 +1,8 @@
 import React from 'react';
 import styles from './PublicPortal.module.css';
-import { 
-  Landmark, ShieldCheck, MessageSquare, 
-  CreditCard, Smartphone, Users, 
+import {
+  Landmark, ShieldCheck, MessageSquare,
+  CreditCard, Smartphone, Users,
   Shield, Star, Heart, Users as UsersIcon, Shield as ShieldIcon, Activity, Phone
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -17,9 +17,9 @@ const ClickableQRCodeCard = ({ title, description, icon: Icon, imageSrc, color, 
   };
 
   return (
-    <div 
-      onClick={handleCardClick} 
-      className={styles.qrCard} 
+    <div
+      onClick={handleCardClick}
+      className={styles.qrCard}
       style={{ borderColor: color, cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
       role="link"
       tabIndex={0}
@@ -47,13 +47,13 @@ const ClickableQRCodeCard = ({ title, description, icon: Icon, imageSrc, color, 
         )}
       </div>
       {phoneInfo && (
-        <div 
+        <div
           className={styles.phoneBadge}
           onClick={(e) => e.stopPropagation()}
         >
           <div className={styles.phoneBadgeLabel}>{phoneInfo.label}</div>
-          <a 
-            href={`tel:${phoneInfo.numberRaw || phoneInfo.number.replace(/\./g, '')}`} 
+          <a
+            href={`tel:${phoneInfo.numberRaw || phoneInfo.number.replace(/\./g, '')}`}
             className={styles.phoneBadgeNumber}
             title="Bấm để gọi ngay"
           >
@@ -72,7 +72,7 @@ const PublicPortal = () => {
     <div className={styles.pageWrapper}>
       {/* Remove fixed width to allow responsive scaling on mobile */}
       <div className={styles.posterContainer}>
-        
+
         {/* Header Section */}
         <div className={styles.posterHeader}>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
@@ -91,8 +91,8 @@ const PublicPortal = () => {
 
         {/* QR Code Grid */}
         <div className={styles.qrGrid}>
-          <ClickableQRCodeCard 
-            title="CỔNG DỊCH VỤ CÔNG QUỐC GIA" 
+          <ClickableQRCodeCard
+            title="CỔNG DỊCH VỤ CÔNG QUỐC GIA"
             description="Thực hiện thủ tục hành chính mọi lúc, mọi nơi"
             icon={Landmark}
             color="#c2410c"
@@ -100,48 +100,49 @@ const PublicPortal = () => {
             href="https://dichvucong.gov.vn/"
             isExternal={true}
           />
-          <ClickableQRCodeCard 
-            title="ỨNG DỤNG ĐỊNH DANH ĐIỆN TỬ (VNeID)" 
+          <ClickableQRCodeCard
+            title="ỨNG DỤNG ĐỊNH DANH ĐIỆN TỬ (VNeID)"
             description="Đăng ký, đăng nhập, sử dụng các tiện ích trên VNeID"
             imageSrc="/images/vneid.png"
             color="#16a34a"
-            qrValue={`${window.location.origin}/huong-dan-vneid`}
-            href="/huong-dan-vneid"
+            qrValue="https://drive.google.com/drive/folders/1XxOD_vUWCmBbo30yMBNJknf3UY6S-im7?usp=sharing"
+            href="https://drive.google.com/drive/folders/1XxOD_vUWCmBbo30yMBNJknf3UY6S-im7?usp=sharing"
+            isExternal={true}
           />
-          <ClickableQRCodeCard 
-            title="PHẢN ÁNH - KIẾN NGHỊ CỦA NGƯỜI DÂN" 
+          <ClickableQRCodeCard
+            title="PHẢN ÁNH - KIẾN NGHỊ CỦA NGƯỜI DÂN"
             description="Phản ánh kịp thời các vấn đề để chính quyền xử lý"
             icon={MessageSquare}
             color="#ea580c"
             qrValue={`${window.location.origin}/phan-anh`}
             href="/phan-anh"
           />
-          <ClickableQRCodeCard 
-            title="THANH TOÁN KHÔNG DÙNG TIỀN MẶT" 
+          <ClickableQRCodeCard
+            title="THANH TOÁN KHÔNG DÙNG TIỀN MẶT"
             description="Thanh toán hóa đơn, học phí, viện phí, phí dịch vụ công..."
             imageSrc="/images/thanh-toan.png"
             color="#9333ea"
             qrValue={`${window.location.origin}/huong-dan-thanh-toan`}
             href="/huong-dan-thanh-toan"
           />
-          <ClickableQRCodeCard 
-            title="ỨNG DỤNG SMART VĨNH LONG" 
+          <ClickableQRCodeCard
+            title="ỨNG DỤNG SMART VĨNH LONG"
             description="Cài đặt và sử dụng các tiện ích đô thị thông minh"
             imageSrc="/images/smart.png"
             color="#0284c7"
             qrValue={`${window.location.origin}/huong-dan-smart-vinh-long`}
             href="/huong-dan-smart-vinh-long"
           />
-          <ClickableQRCodeCard 
-            title="THÔNG TIN BÍ THƯ VÀ TRƯỞNG BAN NHÂN DÂN CÁC ẤP" 
+          <ClickableQRCodeCard
+            title="THÔNG TIN BÍ THƯ VÀ TRƯỞNG BAN NHÂN DÂN CÁC ẤP"
             description="Cập nhật thông tin lãnh đạo, thông báo mới nhất của ấp"
             icon={Users}
             color="#059669"
             qrValue={`${window.location.origin}/danh-sach-lanh-dao`}
             href="/danh-sach-lanh-dao"
           />
-          <ClickableQRCodeCard 
-            title="AN NINH TRẬT TỰ" 
+          <ClickableQRCodeCard
+            title="AN NINH TRẬT TỰ"
             description="Quét mã tra cứu danh sách Tổ bảo vệ ANTT cơ sở các ấp"
             icon={Shield}
             color="#dc2626"
@@ -153,8 +154,8 @@ const PublicPortal = () => {
               numberRaw: '02943872064'
             }}
           />
-          <ClickableQRCodeCard 
-            title="TRA CỨU BẢO HIỂM Y TẾ" 
+          <ClickableQRCodeCard
+            title="TRA CỨU BẢO HIỂM Y TẾ"
             description="Tra cứu nhanh thời hạn sử dụng thẻ Bảo hiểm Y tế"
             icon={Activity}
             color="#2563eb"
@@ -168,11 +169,11 @@ const PublicPortal = () => {
           <div className={styles.footerInfo}>
             <div className={styles.footerItem}>
               <UsersIcon size={24} />
-              <span>CHUNG TAY CHUYỂN ĐỔI SỐ<br/>VÌ CUỘC SỐNG TỐT ĐẸP HƠN</span>
+              <span>CHUNG TAY CHUYỂN ĐỔI SỐ<br />VÌ CUỘC SỐNG TỐT ĐẸP HƠN</span>
             </div>
             <div className={styles.footerItem}>
               <ShieldIcon size={24} />
-              <span>AN TOÀN - BẢO MẬT<br/>HIỆU QUẢ - TIẾT KIỆM</span>
+              <span>AN TOÀN - BẢO MẬT<br />HIỆU QUẢ - TIẾT KIỆM</span>
             </div>
           </div>
           <div className={styles.footerBanner}>
