@@ -104,9 +104,8 @@ const PublicPortal = () => {
             description="Hướng dẫn từng bước tích hợp giấy tờ cá nhân lên ứng dụng VNeID, dễ làm, làm được ngay."
             imageSrc="/images/vneid.png"
             color="#16a34a"
-            qrValue="https://drive.google.com/drive/folders/1XxOD_vUWCmBbo30yMBNJknf3UY6S-im7?usp=sharing"
-            href="https://drive.google.com/drive/folders/1XxOD_vUWCmBbo30yMBNJknf3UY6S-im7?usp=sharing"
-            isExternal={true}
+            qrValue={`${window.location.origin}/huong-dan-tich-hop-giay-to`}
+            href="/huong-dan-tich-hop-giay-to"
           />
           <ClickableQRCodeCard
             title="PHẢN ÁNH - KIẾN NGHỊ CỦA NGƯỜI DÂN"
