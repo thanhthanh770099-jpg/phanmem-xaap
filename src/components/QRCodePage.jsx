@@ -78,7 +78,7 @@ const QRCodePage = () => {
             description="Đăng ký, đăng nhập, sử dụng các tiện ích trên VNeID"
             imageSrc="/images/vneid.png"
             color="#16a34a"
-            qrValue={`${window.location.origin}/huong-dan-vneid`}
+            qrValue="https://drive.google.com/drive/folders/1XxOD_vUWCmBbo30yMBNJknf3UY6S-im7?usp=sharing"
           />
           <QRCodeCard 
             title="PHẢN ÁNH - KIẾN NGHỊ CỦA NGƯỜI DÂN" 
