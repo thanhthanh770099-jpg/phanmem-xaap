@@ -16,6 +16,7 @@ import PaymentGuide from './components/PaymentGuide';
 import VneidGuide from './components/VneidGuide';
 import SmartVinhLongGuide from './components/SmartVinhLongGuide';
 import TraCuuBHYTGuide from './components/TraCuuBHYTGuide';
+import ChungThucGuide from './components/ChungThucGuide';
 import HamletReports from './components/HamletReports';
 
 function App() {
@@ -89,6 +90,10 @@ function App() {
 
   if (window.location.pathname === '/huong-dan-tra-cuu-bhyt') {
     return <TraCuuBHYTGuide />;
+  }
+
+  if (window.location.pathname === '/huong-dan-chung-thuc-ban-sao') {
+    return <ChungThucGuide />;
   }
 
   if (!user) {

@@ -71,7 +71,7 @@ const QRCodePage = () => {
             description="Thực hiện thủ tục hành chính mọi lúc, mọi nơi"
             icon={Landmark}
             color="#c2410c"
-            qrValue="https://dichvucong.gov.vn/"
+            qrValue={`${window.location.origin}/huong-dan-chung-thuc-ban-sao`}
           />
           <QRCodeCard 
             title="HƯỚNG DẪN TÍCH HỢP 13 LOẠI GIẤY TỜ TRÊN VNeID" 

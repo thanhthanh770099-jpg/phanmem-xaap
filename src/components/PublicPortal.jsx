@@ -96,9 +96,8 @@ const PublicPortal = () => {
             description="Thực hiện thủ tục hành chính mọi lúc, mọi nơi"
             icon={Landmark}
             color="#c2410c"
-            qrValue="https://dichvucong.gov.vn/"
-            href="https://dichvucong.gov.vn/"
-            isExternal={true}
+            qrValue={`${window.location.origin}/huong-dan-chung-thuc-ban-sao`}
+            href="/huong-dan-chung-thuc-ban-sao"
           />
           <ClickableQRCodeCard
             title="HƯỚNG DẪN TÍCH HỢP 13 LOẠI GIẤY TỜ TRÊN VNeID"
