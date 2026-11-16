@@ -824,17 +824,6 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
               </button>
             )}
 
-            {handledSuccessData.phone && (
-              <button 
-                type="button" 
-                className={styles.zaloBtn}
-                onClick={() => handleSendZalo(handledSuccessData.phone, handledSuccessData.message, !!handledSuccessData.responseFileUrl)}
-                title="Gửi tin nhắn qua Zalo (tùy chọn)"
-              >
-                <MessageCircle size={16} /> Gửi qua Zalo ({handledSuccessData.phone})
-              </button>
-            )}
-
             {handledSuccessData.responseFileUrl && (
               <a 
                 href={handledSuccessData.responseFileUrl} 
@@ -846,33 +835,10 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                 <Download size={16} /> Tải file công văn gửi kèm
               </a>
             )}
-
-            <button 
-              type="button" 
-              className={styles.copyBtn}
-              onClick={() => handleCopyMessage(handledSuccessData.message)}
-            >
-              {copySuccess ? <Check size={16} color="green" /> : <Copy size={16} />}
-              {copySuccess ? 'Đã sao chép!' : 'Sao chép nội dung'}
-            </button>
-
-            {handledSuccessData.phone && (
-              <a 
-                href={`tel:${getCleanPhone(handledSuccessData.phone)}`}
-                className={styles.callBtn}
-              >
-                <Phone size={16} /> Gọi điện
-              </a>
-            )}
           </div>
           {smsNoticeMessage && (
             <div style={{ marginTop: '10px', color: '#15803d', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#f0fdf4', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
               <CheckCircle size={16} /> {smsNoticeMessage}
-            </div>
-          )}
-          {zaloNoticeMessage && (
-            <div style={{ marginTop: '10px', color: '#0068ff', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#eff6ff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
-              <CheckCircle size={16} /> {zaloNoticeMessage}
             </div>
           )}
           <div style={{ marginTop: '16px' }}>
@@ -907,7 +873,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           {selectedFeedback.phone && (
             <div className={styles.sendCard} style={{ background: '#f0fdf4', borderColor: '#bbf7d0', marginTop: '10px' }}>
               <div className={styles.sendCardHeader} style={{ color: '#15803d' }}>
-                <MessageSquare size={18} /> Gửi kết quả xử lý về SMS / Zalo người phản ánh ({selectedFeedback.phone}):
+                <MessageSquare size={18} /> Gửi kết quả xử lý về SMS người phản ánh ({selectedFeedback.phone}):
               </div>
               <div className={styles.btnGroup}>
                 <button 
@@ -918,19 +884,6 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                   title="Gửi lại tin nhắn SMS thông báo kết quả"
                 >
                   <Send size={16} /> {isSendingSms ? 'Đang gửi SMS...' : `Gửi lại SMS (${selectedFeedback.phone})`}
-                </button>
-
-                <button 
-                  type="button" 
-                  className={styles.zaloBtn}
-                  onClick={() => handleSendZalo(
-                    selectedFeedback.phone, 
-                    generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note, !!selectedFeedback.response_file_url),
-                    !!selectedFeedback.response_file_url
-                  )}
-                  title="Gửi tin nhắn qua Zalo (tùy chọn)"
-                >
-                  <MessageCircle size={16} /> Gửi qua Zalo ({selectedFeedback.phone})
                 </button>
 
                 {selectedFeedback.response_file_url && (
@@ -944,33 +897,10 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                     <Download size={16} /> Tải file công văn gửi kèm
                   </a>
                 )}
-
-                <button 
-                  type="button" 
-                  className={styles.copyBtn}
-                  onClick={() => handleCopyMessage(generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note, !!selectedFeedback.response_file_url))}
-                >
-                  {copySuccess ? <Check size={16} color="green" /> : <Copy size={16} />}
-                  {copySuccess ? 'Đã sao chép!' : 'Sao chép nội dung'}
-                </button>
-
-                {selectedFeedback.phone && (
-                  <a 
-                    href={`tel:${getCleanPhone(selectedFeedback.phone)}`}
-                    className={styles.callBtn}
-                  >
-                    <Phone size={16} /> Gọi điện
-                  </a>
-                )}
               </div>
               {smsNoticeMessage && (
                 <div style={{ marginTop: '10px', color: '#15803d', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #86efac' }}>
                   <CheckCircle size={16} /> {smsNoticeMessage}
-                </div>
-              )}
-              {zaloNoticeMessage && (
-                <div style={{ marginTop: '10px', color: '#0068ff', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#eff6ff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
-                  <CheckCircle size={16} /> {zaloNoticeMessage}
                 </div>
               )}
             </div>
