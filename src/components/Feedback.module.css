@@ -252,6 +252,32 @@
 }
 
 
+.smsBtn {
+  background-color: #16a34a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.smsBtn:hover:not(:disabled) {
+  background-color: #15803d;
+  transform: translateY(-1px);
+}
+
+.smsBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .zaloBtn {
   background-color: #0068ff;
   color: #ffffff;

@@ -58,7 +58,7 @@ const PublicFeedback = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.phone || !formData.phone.trim()) {
-      setStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại liên hệ (có Zalo) của bạn.' });
+      setStatus({ type: 'error', message: 'Vui lòng nhập số điện thoại liên hệ của bạn.' });
       return;
     }
     setIsSubmitting(true);
@@ -75,7 +75,7 @@ const PublicFeedback = () => {
       
       if (!response.ok) throw new Error(data.error || 'Có lỗi xảy ra');
       
-      setStatus({ type: 'success', message: 'Ghi nhận ý kiến thành công! Kết quả giải quyết sẽ được gửi thông báo đến bạn qua Zalo.' });
+      setStatus({ type: 'success', message: 'Ghi nhận ý kiến thành công! Kết quả giải quyết sẽ được gửi thông báo đến bạn qua tin nhắn SMS.' });
       
       setFormData(prev => ({
         ...prev,
@@ -101,7 +101,7 @@ const PublicFeedback = () => {
       <div className={styles.container} style={{ margin: 0, width: '100%', maxWidth: '600px' }}>
         <h2 className={styles.title} style={{ textAlign: 'center', marginBottom: '24px' }}>Cổng Phản Ánh Kiến Nghị</h2>
         <p style={{ textAlign: 'center', color: '#666', marginBottom: '24px' }}>
-          Vui lòng điền thông tin và nội dung phản ánh để gửi đến Ban Lãnh đạo các Ấp. Kết quả xử lý sẽ được gửi trực tiếp đến bạn qua Zalo.
+          Vui lòng điền thông tin và nội dung phản ánh để gửi đến Ban Lãnh đạo các Ấp. Kết quả xử lý sẽ được gửi trực tiếp đến bạn qua tin nhắn SMS.
         </p>
 
         {status.message && (
@@ -116,7 +116,7 @@ const PublicFeedback = () => {
             <input type="text" name="name" value={formData.name} onChange={handleChange} className={styles.input} required />
           </div>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Số điện thoại liên hệ (có Zalo) <span style={{color: 'red'}}>*</span></label>
+            <label className={styles.label}>Số điện thoại liên hệ <span style={{color: 'red'}}>*</span></label>
             <input 
               type="tel" 
               name="phone" 

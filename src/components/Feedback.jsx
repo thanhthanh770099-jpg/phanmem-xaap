@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, CheckCircle, Clock, MessageCircle, Phone, 
   Copy, Check, Download, Edit, Trash2, X, Send, RotateCcw, 
-  Building2, AlertCircle
+  Building2, AlertCircle, MessageSquare
 } from 'lucide-react';
 import styles from './Feedback.module.css';
 
@@ -71,6 +71,8 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const [copySuccess, setCopySuccess] = useState(false);
   const [handledSuccessData, setHandledSuccessData] = useState(null);
   const [zaloNoticeMessage, setZaloNoticeMessage] = useState('');
+  const [smsNoticeMessage, setSmsNoticeMessage] = useState('');
+  const [isSendingSms, setIsSendingSms] = useState(false);
 
   useEffect(() => {
     if (viewMode === 'list') {
@@ -228,6 +230,30 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     window.open(`https://zalo.me/${clean}`, '_blank');
   };
 
+  const handleSendSMS = async (phone, name, responseNote) => {
+    if (!phone) {
+      alert('Không tìm thấy số điện thoại của người dân!');
+      return;
+    }
+    setIsSendingSms(true);
+    setSmsNoticeMessage('');
+    try {
+      const res = await fetch('https://phanmem-xaap.onrender.com/api/feedbacks/send-sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, name, responseNote })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra khi gửi SMS');
+      setSmsNoticeMessage(data.message || `Đã gửi SMS thành công tới SĐT test (0916167374)!`);
+    } catch (err) {
+      setSmsNoticeMessage(`Lỗi gửi SMS: ${err.message}`);
+    } finally {
+      setIsSendingSms(false);
+      setTimeout(() => setSmsNoticeMessage(''), 10000);
+    }
+  };
+
   const handleCopyMessage = (message) => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(message);
@@ -275,7 +301,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
 
       setStatus({ 
         type: 'success', 
-        message: 'Đã hoàn tất xử lý ý kiến thành công! Bạn có thể bấm "Gửi qua Zalo" để gửi thông báo cho người dân.' 
+        message: 'Đã hoàn tất xử lý ý kiến và tự động gửi tin nhắn SMS thông báo cho người dân thành công!' 
       });
     } catch (error) {
       setStatus({ type: 'error', message: error.message || 'Có lỗi xảy ra khi xử lý.' });
@@ -686,7 +712,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           <input type="text" name="name" value={formData.name} onChange={handleCreateChange} className={styles.input} required />
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Số điện thoại liên hệ (có Zalo) <span style={{ color: 'red' }}>*</span></label>
+          <label className={styles.label}>Số điện thoại liên hệ <span style={{ color: 'red' }}>*</span></label>
           <input 
             type="tel" 
             name="phone" 
@@ -780,7 +806,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
             <CheckCircle size={20} /> Đã lưu kết quả xử lý thành công!
           </div>
           <div style={{ fontSize: '14px', color: '#334155', marginBottom: '8px' }}>
-            Nội dung thông báo kết quả gửi về Zalo người dân <strong>({handledSuccessData.phone || 'Chưa có SĐT'})</strong>:
+            Nội dung thông báo kết quả gửi về SMS người phản ánh <strong>({handledSuccessData.phone || 'Chưa có SĐT'})</strong>:
           </div>
           <div style={{ background: '#ffffff', border: '1px solid #cbd5e1', padding: '12px 14px', borderRadius: '6px', fontSize: '13px', lineHeight: 1.6, color: '#1e293b', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
             {handledSuccessData.message}
@@ -789,8 +815,21 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
             {handledSuccessData.phone && (
               <button 
                 type="button" 
+                className={styles.smsBtn}
+                onClick={() => handleSendSMS(handledSuccessData.phone, handledSuccessData.name, handledSuccessData.note)}
+                disabled={isSendingSms}
+                title="Gửi lại tin nhắn SMS thông báo kết quả"
+              >
+                <Send size={16} /> {isSendingSms ? 'Đang gửi SMS...' : `Gửi lại SMS (${handledSuccessData.phone})`}
+              </button>
+            )}
+
+            {handledSuccessData.phone && (
+              <button 
+                type="button" 
                 className={styles.zaloBtn}
                 onClick={() => handleSendZalo(handledSuccessData.phone, handledSuccessData.message, !!handledSuccessData.responseFileUrl)}
+                title="Gửi tin nhắn qua Zalo (tùy chọn)"
               >
                 <MessageCircle size={16} /> Gửi qua Zalo ({handledSuccessData.phone})
               </button>
@@ -826,6 +865,11 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
               </a>
             )}
           </div>
+          {smsNoticeMessage && (
+            <div style={{ marginTop: '10px', color: '#15803d', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#f0fdf4', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
+              <CheckCircle size={16} /> {smsNoticeMessage}
+            </div>
+          )}
           {zaloNoticeMessage && (
             <div style={{ marginTop: '10px', color: '#0068ff', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#eff6ff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
               <CheckCircle size={16} /> {zaloNoticeMessage}
@@ -861,11 +905,21 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
           )}
 
           {selectedFeedback.phone && (
-            <div className={styles.sendCard} style={{ background: '#f8fafc', borderColor: '#e2e8f0', marginTop: '10px' }}>
-              <div className={styles.sendCardHeader} style={{ color: '#0068ff' }}>
-                <MessageCircle size={18} /> Gửi kết quả xử lý qua Zalo người dân ({selectedFeedback.phone}):
+            <div className={styles.sendCard} style={{ background: '#f0fdf4', borderColor: '#bbf7d0', marginTop: '10px' }}>
+              <div className={styles.sendCardHeader} style={{ color: '#15803d' }}>
+                <MessageSquare size={18} /> Gửi kết quả xử lý về SMS / Zalo người phản ánh ({selectedFeedback.phone}):
               </div>
               <div className={styles.btnGroup}>
+                <button 
+                  type="button" 
+                  className={styles.smsBtn}
+                  onClick={() => handleSendSMS(selectedFeedback.phone, selectedFeedback.name, selectedFeedback.response_note)}
+                  disabled={isSendingSms}
+                  title="Gửi lại tin nhắn SMS thông báo kết quả"
+                >
+                  <Send size={16} /> {isSendingSms ? 'Đang gửi SMS...' : `Gửi lại SMS (${selectedFeedback.phone})`}
+                </button>
+
                 <button 
                   type="button" 
                   className={styles.zaloBtn}
@@ -874,6 +928,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                     generateResultMessage(selectedFeedback.name, selectedFeedback.content, selectedFeedback.response_note, !!selectedFeedback.response_file_url),
                     !!selectedFeedback.response_file_url
                   )}
+                  title="Gửi tin nhắn qua Zalo (tùy chọn)"
                 >
                   <MessageCircle size={16} /> Gửi qua Zalo ({selectedFeedback.phone})
                 </button>
@@ -908,6 +963,11 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                   </a>
                 )}
               </div>
+              {smsNoticeMessage && (
+                <div style={{ marginTop: '10px', color: '#15803d', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #86efac' }}>
+                  <CheckCircle size={16} /> {smsNoticeMessage}
+                </div>
+              )}
               {zaloNoticeMessage && (
                 <div style={{ marginTop: '10px', color: '#0068ff', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#eff6ff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
                   <CheckCircle size={16} /> {zaloNoticeMessage}
@@ -1149,14 +1209,17 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
               {handleData.responseFileUrl && <small style={{color:'green'}}>Đã chọn file đính kèm</small>}
             </div>
 
-            {/* Khung thông báo gửi kết quả qua Zalo */}
-            <div className={styles.sendCard}>
-              <div className={styles.sendCardHeader} style={{ color: '#0068ff' }}>
-                <MessageCircle size={18} /> Kết quả sẽ gửi qua Zalo người dân: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.phone || 'Chưa có SĐT'}</strong>
+            {/* Khung thông báo gửi kết quả qua SMS */}
+            <div className={styles.sendCard} style={{ borderColor: '#86efac', backgroundColor: '#f0fdf4' }}>
+              <div className={styles.sendCardHeader} style={{ color: '#15803d' }}>
+                <MessageSquare size={18} /> Kết quả sẽ gửi về tin nhắn SMS người phản ánh: <strong style={{ color: '#0f172a' }}>{selectedFeedback?.phone || 'Chưa có SĐT'}</strong>
               </div>
-              <p style={{ margin: '0', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-                Sau khi bấm <strong>Hoàn tất Xử Lý Ý Kiến</strong>, bạn có thể bấm nút <strong>Gửi qua Zalo</strong> để gửi tin nhắn thông báo giải quyết trực tiếp đến người dân (nội dung kết quả đã tự động sao chép, bạn chỉ việc Dán / Ctrl+V và Gửi).
+              <p style={{ margin: '0', fontSize: '13px', color: '#166534', lineHeight: 1.5 }}>
+                Khi bấm <strong>Hoàn tất Xử Lý Ý Kiến</strong>, hệ thống sẽ <strong>tự động gửi tin nhắn SMS</strong> thông báo kết quả giải quyết trực tiếp đến người dân.
               </p>
+              <div style={{ marginTop: '8px', fontSize: '12px', color: '#854d0e', background: '#fef9c3', padding: '6px 10px', borderRadius: '4px', border: '1px solid #fef08a' }}>
+                ℹ️ <strong>Chế độ thử nghiệm:</strong> Hiện tại tin nhắn SMS đang gửi thử về SĐT test trong code (<strong>0916167374</strong>). Sau này khi có kinh phí thu tiền SMS, hệ thống sẽ tự động cấu hình gửi trực tiếp cho số điện thoại người dân.
+              </div>
             </div>
 
             <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
