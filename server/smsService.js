@@ -2,7 +2,7 @@
 // Gửi SMS Brandname qua API VNPT (định dạng XML send_sms_list)
 require('dotenv').config();
 
-const VNPT_SMS_URL = process.env.VNPT_SMS_URL || '';
+const VNPT_SMS_URL = process.env.VNPT_SMS_URL || 'http://113.185.0.35:8888/smsbn/api';
 const VNPT_API_USER = process.env.VNPT_API_USER || 'vnpt-vnpvlg';
 const VNPT_API_PASS = process.env.VNPT_API_PASS || 'Vnpt@123';
 const VNPT_USERNAME = process.env.VNPT_USERNAME || 'vnpt-vnpvlg';
