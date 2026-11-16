@@ -13,6 +13,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
     "express": "^5.2.1",
     "nodemailer": "^10.2.0",
     "pg": "^8.23.0"
