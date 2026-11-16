@@ -381,6 +381,95 @@ app.put('/api/documents/:id/complete', async (req, res) => {
   }
 });
 
+
+const http = require('http');
+const https = require('https');
+
+// ===== CẤU HÌNH GỬI SMS QUA API VNPT =====
+const VNPT_SMS_CONFIG = {
+  url: process.env.VNPT_SMS_URL || '',
+  contractId: process.env.VNPT_CONTRACT_ID || '495',
+  labelId: process.env.VNPT_LABEL_ID || '87826',
+  templateId: process.env.VNPT_TEMPLATE_ID || '11474554',
+  agentId: process.env.VNPT_AGENT_ID || '268',
+  apiUser: process.env.VNPT_API_USER || 'vnpt-vnpvlg',
+  apiPass: process.env.VNPT_API_PASS || 'Vnpt@123',
+  username: process.env.VNPT_USERNAME || 'vnpt-vnpvlg'
+};
+
+function formatPhoneVN(phone) {
+  if (!phone) return null;
+  let cleaned = phone.replace(/[\s\-\.]/g, '');
+  if (cleaned.startsWith('+84')) cleaned = '84' + cleaned.slice(3);
+  else if (cleaned.startsWith('0')) cleaned = '84' + cleaned.slice(1);
+  else if (!cleaned.startsWith('84')) cleaned = '84' + cleaned;
+  if (cleaned.length < 11 || cleaned.length > 12) return null;
+  return cleaned;
+}
+
+async function sendFeedbackSMS(phone, name, responseNote) {
+  const formattedPhone = formatPhoneVN(phone);
+  if (!formattedPhone) {
+    console.log(`[SMS] Bo qua - SDT khong hop le: ${phone}`);
+    return;
+  }
+
+  if (!VNPT_SMS_CONFIG.url) {
+    console.log(`[SMS MOCK - CHUA DAT VNPT_SMS_URL] Chuan bi gui SMS toi: ${formattedPhone}`);
+    console.log(`[SMS MOCK] Noi dung: UBND Xa Chau Thanh thong bao: Y kien cua Ong/Ba ${name || 'nguoi dan'} da duoc tiep nhan va xu ly. Ket qua: ${(responseNote || 'Da ghi nhan va giai quyet').slice(0, 100)}. Tran trong!`);
+    return;
+  }
+
+  const smsContent = `UBND Xa Chau Thanh thong bao: Y kien cua Ong/Ba ${(name || 'nguoi dan').slice(0, 20)} da duoc tiep nhan va xu ly. Ket qua: ${(responseNote || 'Da ghi nhan va giai quyet').slice(0, 80)}. Tran trong!`;
+
+  const xmlBody = `<RQST name="send_sms_list">
+  <REQID></REQID>
+  <CONTRACTID>${VNPT_SMS_CONFIG.contractId}</CONTRACTID>
+  <LABELID>${VNPT_SMS_CONFIG.labelId}</LABELID>
+  <TEMPLATEID>${VNPT_SMS_CONFIG.templateId}</TEMPLATEID>
+  <ISTELCOSUB>0</ISTELCOSUB>
+  <PARAMS><NUM>1</NUM><CONTENT>${smsContent}</CONTENT></PARAMS>
+  <CONTRACTTYPEID>1</CONTRACTTYPEID>
+  <MAXITEM>0</MAXITEM>
+  <SCHEDULETIME></SCHEDULETIME>
+  <MOBILELIST>${formattedPhone}</MOBILELIST>
+  <AGENTID>${VNPT_SMS_CONFIG.agentId}</AGENTID>
+  <APIUSER>${VNPT_SMS_CONFIG.apiUser}</APIUSER>
+  <APIPASS>${VNPT_SMS_CONFIG.apiPass}</APIPASS>
+  <USERNAME>${VNPT_SMS_CONFIG.username}</USERNAME>
+</RQST>`;
+
+  return new Promise((resolve, reject) => {
+    const parsedUrl = new URL(VNPT_SMS_CONFIG.url);
+    const client = parsedUrl.protocol === 'https:' ? https : http;
+    const options = {
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port || (parsedUrl.protocol === 'https:' ? 443 : 80),
+      path: parsedUrl.pathname + parsedUrl.search,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/xml',
+        'Content-Length': Buffer.byteLength(xmlBody, 'utf8')
+      }
+    };
+    const req = client.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        console.log(`[SMS] Da gui SMS toi ${formattedPhone}. Response: ${data.slice(0, 200)}`);
+        resolve(data);
+      });
+    });
+    req.on('error', (err) => {
+      console.error(`[SMS] Loi gui SMS toi ${formattedPhone}:`, err.message);
+      reject(err);
+    });
+    req.setTimeout(10000, () => { req.destroy(); reject(new Error('SMS request timeout')); });
+    req.write(xmlBody);
+    req.end();
+  });
+}
+
 const nodemailer = require('nodemailer');
 
 // Cấu hình gửi mail qua SMTP (Gmail / Outlook / Mail server)
@@ -547,9 +636,17 @@ app.put('/api/feedbacks/:id/handle', async (req, res) => {
           console.error('Lỗi khi gửi email tự động:', mailErr);
         }
       }
+      // Gửi SMS thông báo kết quả xử lý
+      if (fb.phone) {
+        try {
+          await sendFeedbackSMS(fb.phone, fb.name, responseNote);
+        } catch (smsErr) {
+          console.error('Lỗi khi gửi SMS tự động:', smsErr);
+        }
+      }
     }
 
-    res.json({ message: 'Đã xử lý ý kiến và gửi email thông báo thành công' });
+    res.json({ message: 'Đã xử lý ý kiến và gửi thông báo (email + SMS) thành công' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -663,6 +760,25 @@ app.post('/api/feedbacks/send-email', async (req, res) => {
   } catch (error) {
     console.error('Lỗi khi gửi email:', error);
     res.status(500).json({ error: 'Không thể gửi email: ' + error.message });
+  }
+});
+
+// API 5.3.1: Gửi SMS kết quả xử lý
+app.post('/api/feedbacks/send-sms', async (req, res) => {
+  const { phone, name, responseNote } = req.body;
+  if (!phone) {
+    return res.status(400).json({ error: 'Không tìm thấy số điện thoại người nhận' });
+  }
+
+  try {
+    await sendFeedbackSMS(phone, name, responseNote);
+    res.json({ 
+      success: true, 
+      message: `Đã gửi SMS thông báo kết quả xử lý tới SĐT ${phone} thành công!` 
+    });
+  } catch (error) {
+    console.error('Lỗi khi gửi SMS:', error);
+    res.status(500).json({ error: 'Không thể gửi SMS: ' + error.message });
   }
 });
 
