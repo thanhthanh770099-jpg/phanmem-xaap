@@ -245,7 +245,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra khi gửi SMS');
-      setSmsNoticeMessage(data.message || `Đã gửi SMS thành công tới SĐT test (0916167374)!`);
+      setSmsNoticeMessage(data.message || `Đã gửi SMS thành công tới SĐT test (0911759134)!`);
     } catch (err) {
       setSmsNoticeMessage(`Lỗi gửi SMS: ${err.message}`);
     } finally {
@@ -1148,7 +1148,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                 Khi bấm <strong>Hoàn tất Xử Lý Ý Kiến</strong>, hệ thống sẽ <strong>tự động gửi tin nhắn SMS</strong> thông báo kết quả giải quyết trực tiếp đến người dân.
               </p>
               <div style={{ marginTop: '8px', fontSize: '12px', color: '#854d0e', background: '#fef9c3', padding: '6px 10px', borderRadius: '4px', border: '1px solid #fef08a' }}>
-                ℹ️ <strong>Chế độ thử nghiệm:</strong> Hiện tại tin nhắn SMS đang gửi thử về SĐT test trong code (<strong>0916167374</strong>). Sau này khi có kinh phí thu tiền SMS, hệ thống sẽ tự động cấu hình gửi trực tiếp cho số điện thoại người dân.
+                ℹ️ <strong>Chế độ thử nghiệm:</strong> Hiện tại tin nhắn SMS đang gửi thử về SĐT test trong code (<strong>0911759134</strong>). Sau này khi có kinh phí thu tiền SMS, hệ thống sẽ tự động cấu hình gửi trực tiếp cho số điện thoại người dân.
               </div>
             </div>
 

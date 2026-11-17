@@ -705,11 +705,11 @@ app.post('/api/feedbacks/send-sms', async (req, res) => {
 });
 
 // API test SMS trực tiếp (hỗ trợ kiểm tra qua Postman / cURL)
-// Body mẫu: { "phone": "0916167374", "params": ["ThamSo1", "ThamSo2", "ThamSo3"], "templateId": "11474554" }
+// Body mẫu: { "phone": "0911759134", "params": ["ThamSo1", "ThamSo2", "ThamSo3"], "templateId": "11474554" }
 app.post('/api/sms/test', async (req, res) => {
   try {
     const { phone, params, templateId } = req.body;
-    const testPhone = phone || '0916167374';
+    const testPhone = phone || '0911759134';
     const testParams = params || ['Thu nhap test 30', 'Luong test noi dung 200', 'Thuc lanh 20'];
     const result = await sendSms(testPhone, testParams, templateId);
     res.status(result.success ? 200 : (result.isMock ? 200 : 400)).json(result);

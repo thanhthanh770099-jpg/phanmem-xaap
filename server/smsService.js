@@ -12,9 +12,9 @@ const VNPT_CONTRACT_TYPE_ID = process.env.VNPT_CONTRACT_TYPE_ID || '1';
 const VNPT_LABEL_ID = process.env.VNPT_LABEL_ID || '87826';
 const VNPT_TEMPLATE_ID = process.env.VNPT_TEMPLATE_ID || '11474554';
 
-// Cờ chế độ test: true = luôn gửi đến số test 84916167374
+// Cờ chế độ test: true = luôn gửi đến số test 84911759134
 const SMS_TEST_MODE = process.env.SMS_TEST_MODE !== 'false';
-const SMS_TEST_PHONE = process.env.SMS_TEST_PHONE || '84916167374';
+const SMS_TEST_PHONE = process.env.SMS_TEST_PHONE || '84911759134';
 
 // Escape ký tự đặc biệt để không làm hỏng XML (&, <, > trong nội dung)
 function xmlEscape(str = '') {
@@ -91,7 +91,7 @@ function getTag(xml, tag) {
  * @param {string} [customTemplateId] - ID mẫu tin nếu muốn dùng mẫu khác
  */
 async function sendSms(phone, params, customTemplateId) {
-  // Nếu ở chế độ test => gửi về SMS_TEST_PHONE (0916167374)
+  // Nếu ở chế độ test => gửi về SMS_TEST_PHONE (0911759134)
   const originalPhones = (Array.isArray(phone) ? phone : [phone]).map(normalizePhone);
   const targetPhones = SMS_TEST_MODE ? [normalizePhone(SMS_TEST_PHONE)] : originalPhones;
 
