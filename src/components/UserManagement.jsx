@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Feedback.module.css'; // Using the same styles as Feedback for consistency
+import { API_BASE } from '../api';
 
 const UserManagement = ({ user }) => {
   const [users, setUsers] = useState([]);
@@ -25,7 +26,7 @@ const UserManagement = ({ user }) => {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('https://phanmem-xaap.onrender.com/api/users');
+      const res = await fetch(`${API_BASE}/api/users`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setUsers(data);
@@ -41,7 +42,7 @@ const UserManagement = ({ user }) => {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa tài khoản "${username}" không?`)) return;
     
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/users/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/api/users/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Xóa thất bại');
       setUsers(users.filter(u => u.id !== id));
       alert('Đã xóa tài khoản thành công!');
@@ -55,7 +56,7 @@ const UserManagement = ({ user }) => {
     if (!newPassword) return;
 
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/users/${id}/reset-password`, {
+      const res = await fetch(`${API_BASE}/api/users/${id}/reset-password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newPassword })
@@ -78,7 +79,7 @@ const UserManagement = ({ user }) => {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('https://phanmem-xaap.onrender.com/api/users', {
+      const response = await fetch(`${API_BASE}/api/users`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

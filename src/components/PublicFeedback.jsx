@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Feedback.module.css';
 import BackToPortalButton from './BackToPortalButton';
+import { API_BASE } from '../api';
 
 const PublicFeedback = () => {
   const [hamlets, setHamlets] = useState([]);
@@ -21,7 +22,7 @@ const PublicFeedback = () => {
 
   const fetchHamlets = async () => {
     try {
-      const res = await fetch('https://phanmem-xaap.onrender.com/api/users/hamlets');
+      const res = await fetch(`${API_BASE}/api/users/hamlets`);
       const data = await res.json();
       setHamlets(data);
       if (data.length > 0) {
@@ -65,7 +66,7 @@ const PublicFeedback = () => {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('https://phanmem-xaap.onrender.com/api/feedbacks', {
+      const response = await fetch(`${API_BASE}/api/feedbacks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

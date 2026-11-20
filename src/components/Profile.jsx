@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import styles from './Profile.module.css';
+import { API_BASE } from '../api';
 
 const Profile = ({ user, onUserUpdate }) => {
   const [oldPassword, setOldPassword] = useState('');
@@ -28,7 +29,7 @@ const Profile = ({ user, onUserUpdate }) => {
 
     setIsPwdLoading(true);
     try {
-      const response = await fetch(`https://phanmem-xaap.onrender.com/api/users/${user.id}/password`, {
+      const response = await fetch(`${API_BASE}/api/users/${user.id}/password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ oldPassword, newPassword })
@@ -68,7 +69,7 @@ const Profile = ({ user, onUserUpdate }) => {
 
     setIsAvatarLoading(true);
     try {
-      const response = await fetch(`https://phanmem-xaap.onrender.com/api/users/${user.id}/avatar`, {
+      const response = await fetch(`${API_BASE}/api/users/${user.id}/avatar`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ avatar: avatarBase64 })

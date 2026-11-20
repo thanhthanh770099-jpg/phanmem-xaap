@@ -381,7 +381,7 @@ app.put('/api/documents/:id/complete', async (req, res) => {
   }
 });
 
-const { sendSms, sendFeedbackNotification, SMS_TEST_MODE, SMS_TEST_PHONE } = require('./smsService');
+const { sendSms, sendFeedbackNotification, checkSmsConnectivity, SMS_TEST_MODE, SMS_TEST_PHONE } = require('./smsService');
 
 const nodemailer = require('nodemailer');
 
@@ -535,6 +535,7 @@ app.put('/api/feedbacks/:id/handle', async (req, res) => {
       [responseNote, responseFileUrl, id]
     );
 
+    let smsResult = null;
     if (rows.length > 0) {
       const fb = rows[0];
       let hamletName = '';
@@ -551,15 +552,19 @@ app.put('/api/feedbacks/:id/handle', async (req, res) => {
       }
       if (fb.phone) {
         try {
-          await sendFeedbackNotification(fb.phone, fb.name, responseNote, id);
+          smsResult = await sendFeedbackNotification(fb.phone, fb.name, responseNote, id);
         } catch (smsErr) {
           console.error('Lỗi khi gửi SMS tự động:', smsErr);
+          smsResult = { success: false, error: smsErr.message };
         }
       }
     }
 
     res.json({ 
-      message: 'Đã xử lý ý kiến và gửi thông báo kết quả (email + SMS) thành công!',
+      message: smsResult?.success
+        ? 'Đã xử lý ý kiến và gửi thông báo kết quả (email + SMS) thành công!'
+        : 'Đã lưu kết quả xử lý ý kiến.',
+      smsResult,
       isTestMode: SMS_TEST_MODE,
       testPhone: SMS_TEST_PHONE
     });
@@ -689,11 +694,13 @@ app.post('/api/feedbacks/send-sms', async (req, res) => {
   try {
     const result = await sendFeedbackNotification(phone, name, responseNote, id);
     const dest = result?.targetPhones?.join(', ') || (SMS_TEST_MODE ? SMS_TEST_PHONE : phone);
-    res.json({ 
+    const failReason = result.errorDesc || result.errorDetail || result.error || result.message || 'Lỗi gửi SMS';
+    res.status(result.success ? 200 : 400).json({ 
       success: result.success, 
       message: result.success 
         ? `Đã gửi SMS kết quả xử lý thành công tới ${dest}!`
-        : (result.errorDesc || result.message || 'Lỗi gửi SMS'),
+        : `Không gửi được SMS (${failReason})`,
+      error: result.success ? undefined : failReason,
       targetPhone: dest,
       isTestMode: SMS_TEST_MODE,
       data: result
@@ -704,14 +711,26 @@ app.post('/api/feedbacks/send-sms', async (req, res) => {
   }
 });
 
+// API kiểm tra kết nối từ server tới cổng SMS VNPT (không gửi tin thật)
+app.get('/api/sms/check', async (req, res) => {
+  try {
+    const info = await checkSmsConnectivity();
+    res.json(info);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // API test SMS trực tiếp (hỗ trợ kiểm tra qua Postman / cURL)
-// Body mẫu: { "phone": "0911759134", "params": ["ThamSo1", "ThamSo2", "ThamSo3"], "templateId": "11474554" }
+// Body mẫu: { "phone": "0911759134", "params": ["ThamSo1", "ThamSo2", "ThamSo3"], "templateId": "11474554", "format": "auto", "target": "public|private" }
 app.post('/api/sms/test', async (req, res) => {
   try {
-    const { phone, params, templateId } = req.body;
+    const { phone, params, templateId, format, target } = req.body || {};
     const testPhone = phone || '0911759134';
     const testParams = params || ['Thu nhap test 30', 'Luong test noi dung 200', 'Thuc lanh 20'];
-    const result = await sendSms(testPhone, testParams, templateId);
+    const safeTarget = target === 'public' || target === 'private' ? target : undefined;
+    const safeFormat = format === 'json' || format === 'xml' || format === 'auto' ? format : undefined;
+    const result = await sendSms(testPhone, testParams, templateId, { format: safeFormat, target: safeTarget });
     res.status(result.success ? 200 : (result.isMock ? 200 : 400)).json(result);
   } catch (err) {
     console.error('[SMS] Lỗi test:', err);

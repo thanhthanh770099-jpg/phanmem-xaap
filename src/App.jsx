@@ -19,6 +19,7 @@ import TraCuuBHYTGuide from './components/TraCuuBHYTGuide';
 import ChungThucGuide from './components/ChungThucGuide';
 import TichHopGiayToGuide from './components/TichHopGiayToGuide';
 import HamletReports from './components/HamletReports';
+import { API_BASE } from './api';
 
 function App() {
   const [activeTab, setActiveTab] = useState(0); // 0 = Dashboard
@@ -29,7 +30,7 @@ function App() {
   const fetchUnreadCount = async () => {
     if (!user) return;
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/documents/unread-count?userId=${user.id}`)
+      const res = await fetch(`${API_BASE}/api/documents/unread-count?userId=${user.id}`)
       const data = await res.json();
       setUnreadDocCount(data.unreadCount || 0);
     } catch (e) {
@@ -40,7 +41,7 @@ function App() {
   const fetchUnreadFeedbackCount = async () => {
     if (!user) return;
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/unread-count?userId=${user.id}`)
+      const res = await fetch(`${API_BASE}/api/feedbacks/unread-count?userId=${user.id}`)
       const data = await res.json();
       setUnreadFeedbackCount(data.unreadCount || 0);
     } catch (e) {

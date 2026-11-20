@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Dashboard.module.css';
 import { FileText, Users, CheckCircle, Clock, FileSpreadsheet } from 'lucide-react';
+import { API_BASE } from '../api';
 
 const StatCard = ({ title, value, icon, color }) => (
   <div className={styles.statCard}>
@@ -18,7 +19,7 @@ const Dashboard = ({ setActiveTab }) => {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    fetch('https://phanmem-xaap.onrender.com/api/dashboard/stats')
+    fetch(`${API_BASE}/api/dashboard/stats`)
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error('Lỗi khi tải dữ liệu thống kê:', err));

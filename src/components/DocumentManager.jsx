@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './DocumentManager.module.css';
+import { API_BASE } from '../api';
 
 const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
   const [isSending, setIsSending] = useState(false);
@@ -28,7 +29,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
 
   const fetchDocuments = async () => {
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/documents?userId=${user.id}&type=${currentTab}`);
+      const res = await fetch(`${API_BASE}/api/documents?userId=${user.id}&type=${currentTab}`);
       const data = await res.json();
       setDocuments(data);
     } catch (e) {
@@ -38,7 +39,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
 
   const fetchHamlets = async () => {
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/users/hamlets`);
+      const res = await fetch(`${API_BASE}/api/users/hamlets`);
       const data = await res.json();
       setHamlets(data);
     } catch (e) {
@@ -71,7 +72,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
   const handleSendDocument = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('https://phanmem-xaap.onrender.com/api/documents', {
+      const res = await fetch(`${API_BASE}/api/documents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -102,7 +103,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
     setShowDetail(doc);
     if (currentTab === 'inbox' && doc.status === 'unread') {
       try {
-        await fetch(`https://phanmem-xaap.onrender.com/api/documents/${doc.id}/read`, {
+        await fetch(`${API_BASE}/api/documents/${doc.id}/read`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.id })
@@ -117,7 +118,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
 
   const handleCompleteDocument = async () => {
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/documents/${showDetail.id}/complete`, {
+      const res = await fetch(`${API_BASE}/api/documents/${showDetail.id}/complete`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id })
@@ -142,7 +143,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
     
     try {
       // 1. Send the reply document
-      const postRes = await fetch('https://phanmem-xaap.onrender.com/api/documents', {
+      const postRes = await fetch(`${API_BASE}/api/documents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -159,7 +160,7 @@ const DocumentManager = ({ user, unreadDocCount, refreshUnreadCount }) => {
       }
 
       // 2. Mark the original document as completed
-      const putRes = await fetch(`https://phanmem-xaap.onrender.com/api/documents/${showDetail.id}/complete`, {
+      const putRes = await fetch(`${API_BASE}/api/documents/${showDetail.id}/complete`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id })

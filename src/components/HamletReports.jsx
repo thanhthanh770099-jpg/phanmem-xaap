@@ -7,8 +7,8 @@ import {
   TrendingUp, Users, Building2, Check, ExternalLink
 } from 'lucide-react';
 import styles from './HamletReports.module.css';
+import { API_BASE } from '../api';
 
-const API_BASE = 'https://phanmem-xaap.onrender.com';
 
 const HamletReports = ({ user }) => {
   const isHamlet = user?.role === 'user';

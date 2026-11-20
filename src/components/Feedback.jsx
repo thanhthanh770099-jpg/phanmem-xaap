@@ -5,6 +5,7 @@ import {
   Building2, AlertCircle, MessageSquare
 } from 'lucide-react';
 import styles from './Feedback.module.css';
+import { API_BASE } from '../api';
 
 export const DEPARTMENTS = [
   'Phòng Văn hóa - Xã hội',
@@ -71,7 +72,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const [copySuccess, setCopySuccess] = useState(false);
   const [handledSuccessData, setHandledSuccessData] = useState(null);
   const [zaloNoticeMessage, setZaloNoticeMessage] = useState('');
-  const [smsNoticeMessage, setSmsNoticeMessage] = useState('');
+  const [smsNotice, setSmsNotice] = useState({ type: '', text: '' });
   const [isSendingSms, setIsSendingSms] = useState(false);
 
   useEffect(() => {
@@ -89,7 +90,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
   const fetchFeedbacks = async () => {
     setIsLoadingFeedbacks(true);
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks?userId=${user.id}&role=${user.role}`);
+      const res = await fetch(`${API_BASE}/api/feedbacks?userId=${user.id}&role=${user.role}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setFeedbacks(data);
@@ -107,7 +108,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
 
   const fetchHamlets = async () => {
     try {
-      const res = await fetch('https://phanmem-xaap.onrender.com/api/users/hamlets');
+      const res = await fetch(`${API_BASE}/api/users/hamlets`);
       const data = await res.json();
       setHamlets(data);
       if (data.length > 0 && !formData.hamletId && user.role !== 'user') {
@@ -166,7 +167,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('https://phanmem-xaap.onrender.com/api/feedbacks', {
+      const response = await fetch(`${API_BASE}/api/feedbacks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -230,27 +231,35 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     window.open(`https://zalo.me/${clean}`, '_blank');
   };
 
-  const handleSendSMS = async (phone, name, responseNote) => {
+  const handleSendSMS = async (phone, name, responseNote, feedbackId) => {
     if (!phone) {
       alert('Không tìm thấy số điện thoại của người dân!');
       return;
     }
     setIsSendingSms(true);
-    setSmsNoticeMessage('');
+    setSmsNotice({ type: '', text: '' });
     try {
-      const res = await fetch('https://phanmem-xaap.onrender.com/api/feedbacks/send-sms', {
+      const res = await fetch(`${API_BASE}/api/feedbacks/send-sms`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, name, responseNote })
+        body: JSON.stringify({ phone, name, responseNote, id: feedbackId })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra khi gửi SMS');
-      setSmsNoticeMessage(data.message || `Đã gửi SMS thành công tới SĐT test (0911759134)!`);
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || data.message || 'Có lỗi xảy ra khi gửi SMS');
+      }
+      setSmsNotice({
+        type: 'success',
+        text: data.message || 'Đã gửi SMS thành công tới SĐT test (0911759134)!'
+      });
     } catch (err) {
-      setSmsNoticeMessage(`Lỗi gửi SMS: ${err.message}`);
+      setSmsNotice({
+        type: 'error',
+        text: `Lỗi gửi SMS: ${err.message}`
+      });
     } finally {
       setIsSendingSms(false);
-      setTimeout(() => setSmsNoticeMessage(''), 10000);
+      setTimeout(() => setSmsNotice({ type: '', text: '' }), 10000);
     }
   };
 
@@ -268,7 +277,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${selectedFeedback.id}/handle`, {
+      const response = await fetch(`${API_BASE}/api/feedbacks/${selectedFeedback.id}/handle`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(handleData)
@@ -299,10 +308,28 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
         handled_at: new Date().toISOString()
       }));
 
-      setStatus({ 
-        type: 'success', 
-        message: 'Đã hoàn tất xử lý ý kiến và tự động gửi tin nhắn SMS thông báo cho người dân thành công!' 
-      });
+      const smsOk = data.smsResult?.success;
+      const smsFailMsg = data.smsResult?.errorDesc || data.smsResult?.errorDetail || data.smsResult?.error || data.smsResult?.message;
+      if (smsOk) {
+        setStatus({
+          type: 'success',
+          message: 'Đã hoàn tất xử lý ý kiến và tự động gửi tin nhắn SMS thông báo cho người dân thành công!'
+        });
+        setSmsNotice({
+          type: 'success',
+          text: `Đã tự động gửi SMS tới ${data.smsResult.targetPhones?.join(', ') || data.testPhone || '0911759134'}!`
+        });
+      } else {
+        setStatus({
+          type: 'success',
+          message: smsFailMsg
+            ? `Đã lưu kết quả xử lý ý kiến. (Chưa gửi được SMS: ${smsFailMsg})`
+            : 'Đã lưu kết quả xử lý ý kiến thành công!'
+        });
+        if (smsFailMsg) {
+          setSmsNotice({ type: 'error', text: `Chưa gửi được SMS: ${smsFailMsg}` });
+        }
+      }
     } catch (error) {
       setStatus({ type: 'error', message: error.message || 'Có lỗi xảy ra khi xử lý.' });
     } finally {
@@ -327,7 +354,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     if (!forwardModalFeedback) return;
     setIsForwarding(true);
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${forwardModalFeedback.id}/forward-to-commune`, {
+      const res = await fetch(`${API_BASE}/api/feedbacks/${forwardModalFeedback.id}/forward-to-commune`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -374,7 +401,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     }
     setIsAssigningDept(true);
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${selectedFeedback.id}/assign-department`, {
+      const res = await fetch(`${API_BASE}/api/feedbacks/${selectedFeedback.id}/assign-department`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -407,7 +434,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       return;
     }
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${fb.id}/recall-forward`, {
+      const res = await fetch(`${API_BASE}/api/feedbacks/${fb.id}/recall-forward`, {
         method: 'PUT'
       });
       const data = await res.json();
@@ -442,7 +469,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
       return;
     }
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${id}`, {
+      const res = await fetch(`${API_BASE}/api/feedbacks/${id}`, {
         method: 'DELETE'
       });
       const data = await res.json();
@@ -488,7 +515,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
     if (!editingFeedback) return;
     setIsUpdating(true);
     try {
-      const res = await fetch(`https://phanmem-xaap.onrender.com/api/feedbacks/${editingFeedback.id}`, {
+      const res = await fetch(`${API_BASE}/api/feedbacks/${editingFeedback.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editFormData)
@@ -816,7 +843,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
               <button 
                 type="button" 
                 className={styles.smsBtn}
-                onClick={() => handleSendSMS(handledSuccessData.phone, handledSuccessData.name, handledSuccessData.note)}
+                onClick={() => handleSendSMS(handledSuccessData.phone, handledSuccessData.name, handledSuccessData.note, selectedFeedback?.id)}
                 disabled={isSendingSms}
                 title="Gửi lại tin nhắn SMS thông báo kết quả"
               >
@@ -836,9 +863,21 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
               </a>
             )}
           </div>
-          {smsNoticeMessage && (
-            <div style={{ marginTop: '10px', color: '#15803d', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#f0fdf4', padding: '8px 12px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
-              <CheckCircle size={16} /> {smsNoticeMessage}
+          {smsNotice.text && (
+            <div style={{
+              marginTop: '10px',
+              color: smsNotice.type === 'error' ? '#b91c1c' : '#15803d',
+              fontWeight: 'bold',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: smsNotice.type === 'error' ? '#fef2f2' : '#f0fdf4',
+              padding: '8px 12px',
+              borderRadius: '6px',
+              border: `1px solid ${smsNotice.type === 'error' ? '#fecaca' : '#bbf7d0'}`
+            }}>
+              {smsNotice.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />} {smsNotice.text}
             </div>
           )}
           <div style={{ marginTop: '16px' }}>
@@ -879,7 +918,7 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                 <button 
                   type="button" 
                   className={styles.smsBtn}
-                  onClick={() => handleSendSMS(selectedFeedback.phone, selectedFeedback.name, selectedFeedback.response_note)}
+                  onClick={() => handleSendSMS(selectedFeedback.phone, selectedFeedback.name, selectedFeedback.response_note, selectedFeedback.id)}
                   disabled={isSendingSms}
                   title="Gửi lại tin nhắn SMS thông báo kết quả"
                 >
@@ -898,9 +937,21 @@ const Feedback = ({ user, refreshUnreadFeedbackCount }) => {
                   </a>
                 )}
               </div>
-              {smsNoticeMessage && (
-                <div style={{ marginTop: '10px', color: '#15803d', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', padding: '8px 12px', borderRadius: '6px', border: '1px solid #86efac' }}>
-                  <CheckCircle size={16} /> {smsNoticeMessage}
+              {smsNotice.text && (
+                <div style={{
+                  marginTop: '10px',
+                  color: smsNotice.type === 'error' ? '#b91c1c' : '#15803d',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: smsNotice.type === 'error' ? '#fef2f2' : '#ffffff',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  border: `1px solid ${smsNotice.type === 'error' ? '#fecaca' : '#86efac'}`
+                }}>
+                  {smsNotice.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle size={16} />} {smsNotice.text}
                 </div>
               )}
             </div>
